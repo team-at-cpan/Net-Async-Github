@@ -67,11 +67,11 @@ You probably just wanted C<token>.
 =cut
 
 sub configure {
-	my ($self, %args) = @_;
-	for my $k (grep exists $args{$_}, qw(token endpoints api_key http base_uri mime_type)) {
-		$self->{$k} = delete $args{$k};
-	}
-	$self->SUPER::configure(%args);
+    my ($self, %args) = @_;
+    for my $k (grep exists $args{$_}, qw(token endpoints api_key http base_uri mime_type)) {
+        $self->{$k} = delete $args{$k};
+    }
+    $self->SUPER::configure(%args);
 }
 
 =head2 reopen
@@ -181,7 +181,7 @@ Requires the following named parameters:
 sub head {
     my ($self, %args) = @_;
     die "needs $_" for grep !$args{$_}, qw(owner repo branch);
-	die "invalid branch format" unless $args{branch} =~ m{^(\w+)/(\w+)$};
+    die "invalid branch format" unless $args{branch} =~ m{^(\w+)/(\w+)$};
     my $uri = URI->new('https://api.github.com/');
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, qw(git refs heads), $args{branch}
@@ -203,7 +203,7 @@ sub head {
 sub update {
     my ($self, %args) = @_;
     die "needs $_" for grep !$args{$_}, qw(owner repo branch head);
-	$self->validate_branch_name($args{branch});
+    $self->validate_branch_name($args{branch});
     my $uri = URI->new('https://api.github.com/');
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, qw(merges)
@@ -227,12 +227,12 @@ sub update {
 =cut
 
 sub rate_limit {
-	my ($self) = @_;
-	$self->http_get(
-		uri => $self->endpoint('rate_limit')
-	)->transform(
-		done => sub { Net::Async::Github::RateLimit->new(%{$_[0]}) }
-	)
+    my ($self) = @_;
+    $self->http_get(
+        uri => $self->endpoint('rate_limit')
+    )->transform(
+        done => sub { Net::Async::Github::RateLimit->new(%{$_[0]}) }
+    )
 }
 
 =head1 METHODS - Internal
@@ -260,20 +260,20 @@ templates, used by L</endpoint>.
 =cut
 
 sub endpoints {
-	my ($self) = @_;
-	$self->{endpoints} ||= do {
-		require File::ShareDir;
-		require Path::Tiny;
-		$json->decode(
-			Path::Tiny::path(
-				'share/endpoints.json' //
-				File::ShareDir::dist_file(
-					'Net-Async-Github',
-					'endpoints.json'
-				)
-			)->slurp_utf8
-		);
-	}
+    my ($self) = @_;
+    $self->{endpoints} ||= do {
+        require File::ShareDir;
+        require Path::Tiny;
+        $json->decode(
+            Path::Tiny::path(
+                'share/endpoints.json' //
+                File::ShareDir::dist_file(
+                    'Net-Async-Github',
+                    'endpoints.json'
+                )
+            )->slurp_utf8
+        );
+    }
 }
 
 =head2 endpoint
@@ -286,8 +286,8 @@ Returns a L<URI> instance.
 =cut
 
 sub endpoint {
-	my ($self, $endpoint, %args) = @_;
-	URI::Template->new($self->endpoints->{$endpoint . '_url'})->process(%args);
+    my ($self, $endpoint, %args) = @_;
+    URI::Template->new($self->endpoints->{$endpoint . '_url'})->process(%args);
 }
 
 =head2 http
@@ -300,22 +300,22 @@ Actual HTTP implementation is not guaranteed, and the default is likely to chang
 =cut
 
 sub http {
-	my ($self) = @_;
-	$self->{http} ||= do {
-		require Net::Async::HTTP;
-		$self->add_child(
-			my $ua = Net::Async::HTTP->new(
-				fail_on_error            => 1,
-				max_connections_per_host => 4,
-				pipeline                 => 1,
-				max_in_flight            => 4,
-				decode_content           => 1,
-				timeout                  => 30,
-				user_agent               => 'Mozilla/4.0 (perl; Net::Async::Github; TEAM@cpan.org)',
-			)
-		);
-		$ua
-	}
+    my ($self) = @_;
+    $self->{http} ||= do {
+        require Net::Async::HTTP;
+        $self->add_child(
+            my $ua = Net::Async::HTTP->new(
+                fail_on_error            => 1,
+                max_connections_per_host => 4,
+                pipeline                 => 1,
+                max_in_flight            => 4,
+                decode_content           => 1,
+                timeout                  => 30,
+                user_agent               => 'Mozilla/4.0 (perl; Net::Async::Github; TEAM@cpan.org)',
+            )
+        );
+        $ua
+    }
 }
 
 =head2 auth_info
@@ -325,22 +325,22 @@ Returns authentication information used in the HTTP request.
 =cut
 
 sub auth_info {
-	my ($self) = @_;
-	if(my $key = $self->api_key) {
-		return (
-			user => $key,
-			pass => '',
-		);
-	}
-	if(my $token = $self->token) {
-		return (
-			headers => {
-				Authorization => 'token ' . $token
-			}
-		)
-	}
+    my ($self) = @_;
+    if(my $key = $self->api_key) {
+        return (
+            user => $key,
+            pass => '',
+        );
+    }
+    if(my $token = $self->token) {
+        return (
+            headers => {
+                Authorization => 'token ' . $token
+            }
+        )
+    }
 
-	die "need some form of auth, try passing a token or api_key"
+    die "need some form of auth, try passing a token or api_key"
 }
 
 =head2 mime_type
@@ -367,43 +367,43 @@ Performs an HTTP GET request.
 =cut
 
 sub http_get {
-	my ($self, %args) = @_;
-	my %auth = $self->auth_info;
+    my ($self, %args) = @_;
+    my %auth = $self->auth_info;
 
-	if(my $hdr = delete $auth{headers}) {
-		$args{headers}{$_} //= $hdr->{$_} for keys %$hdr
-	}
-	$args{$_} //= $auth{$_} for keys %auth;
+    if(my $hdr = delete $auth{headers}) {
+        $args{headers}{$_} //= $hdr->{$_} for keys %$hdr
+    }
+    $args{$_} //= $auth{$_} for keys %auth;
 
-	$log->tracef("GET %s { %s }", ''. $args{uri}, \%args);
+    $log->tracef("GET %s { %s }", ''. $args{uri}, \%args);
     $self->http->GET(
         (delete $args{uri}),
-		%args
+        %args
     )->then(sub {
         my ($resp) = @_;
-		$log->tracef("Github response: %s", $resp->as_string("\n"));
+        $log->tracef("Github response: %s", $resp->as_string("\n"));
         return Future->done(
-			{ },
-			$resp
-		) if $resp->code == 204;
+            { },
+            $resp
+        ) if $resp->code == 204;
         return Future->done(
-			{ },
-			$resp
-		) if 3 == ($resp->code / 100);
+            { },
+            $resp
+        ) if 3 == ($resp->code / 100);
         try {
             return Future->done(
-				$json->decode(
-					$resp->decoded_content
-				),
-				$resp
-			);
+                $json->decode(
+                    $resp->decoded_content
+                ),
+                $resp
+            );
         } catch {
             $log->errorf("JSON decoding error %s from HTTP response %s", $@, $resp->as_string("\n"));
             return Future->fail($@ => json => $resp);
         }
     })->else(sub {
         my ($err, $src, $resp, $req) = @_;
-		$log->warnf("Github failed with error %s on source %s", $err, $src);
+        $log->warnf("Github failed with error %s on source %s", $err, $src);
         $src //= '';
         if($src eq 'http') {
             $log->errorf("HTTP error %s, request was %s with response %s", $err, $req->as_string("\n"), $resp->as_string("\n"));
@@ -420,7 +420,7 @@ sub api_get_list {
     use Future::Utils qw(fmap0);
     use namespace::clean qw(retain_future refaddr);
 
-	my ($self, %args) = @_;
+    my ($self, %args) = @_;
     my $label = $args{endpoint}
     ? ('Github[' . $args{endpoint} . ']')
     : (caller 1)[3];
@@ -443,26 +443,26 @@ sub api_get_list {
 #    $uri->query_param(
 #        limit => $per_page
 #    );
-	my @pending = $uri;
+    my @pending = $uri;
     my $f = (fmap0 {
-		my $uri = shift;
+        my $uri = shift;
 #        $uri->query_param(
 #            before => $per_page
 #        );
         $self->http_get(
             uri => $uri,
         )->on_done(sub {
-			my ($data, $resp) = @_;
-			# Handle paging - this takes the form of zero or more Link headers like this:
-			# Link: <https://api.github.com/user/repos?page=2>; rel="next"
-			if(my @links = $resp->header('Link')) {
-				@links = map { split /\s*,\s*/, $_ } @links;
-				for my $link (@links) {
-					if($link =~ m{<([^>]+)>; rel="next"}) {
-						push @pending, $1;
-					}
-				}
-			}
+            my ($data, $resp) = @_;
+            # Handle paging - this takes the form of zero or more Link headers like this:
+            # Link: <https://api.github.com/user/repos?page=2>; rel="next"
+            if(my @links = $resp->header('Link')) {
+                @links = map { split /\s*,\s*/, $_ } @links;
+                for my $link (@links) {
+                    if($link =~ m{<([^>]+)>; rel="next"}) {
+                        push @pending, $1;
+                    }
+                }
+            }
 
             $src->emit(
                 $args{class}->new(
@@ -472,15 +472,15 @@ sub api_get_list {
                 )
             ) for @{ $_[0] };
         })->on_fail(sub {
-			warn "fail - @_";
+            warn "fail - @_";
             $src->fail(@_)
         })->on_cancel(sub {
-			warn "cancel - @_";
+            warn "cancel - @_";
             $src->cancel
         });
     } foreach => \@pending)->on_done(sub {
-		$src->finish;
-	});
+        $src->finish;
+    });
 
     # If our source finishes earlier than our HTTP request, then cancel the request
     $src->completed->on_ready(sub {
@@ -510,9 +510,9 @@ sub api_get_list {
 
 sub pending_requests {
     shift->{pending_requests} //= do {
-		require Adapter::Async::OrderedList::Array;
-		Adapter::Async::OrderedList::Array->new
-	}
+        require Adapter::Async::OrderedList::Array;
+        Adapter::Async::OrderedList::Array->new
+    }
 }
 
 =head2 validate_branch_name
@@ -524,14 +524,14 @@ Will raise an exception on invalid input.
 =cut
 
 sub validate_branch_name {
-	my ($self, $branch) = @_;
-	die "branch is undef" unless defined $branch;
-	die "branch contains path component with leading ." if $branch =~ m{/\.};
-	die "branch contains double ." if $branch =~ m{\.\.};
-	die "branch contains invalid character(s)" if $branch =~ m{[[:cntrl:][:space:]~^:\\]};
-	die "branch ends with /" if substr($branch, -1) eq '/';
-	die "branch ends with .lock" if substr($branch, -5) eq '.lock';
-	return 1;
+    my ($self, $branch) = @_;
+    die "branch is undef" unless defined $branch;
+    die "branch contains path component with leading ." if $branch =~ m{/\.};
+    die "branch contains double ." if $branch =~ m{\.\.};
+    die "branch contains invalid character(s)" if $branch =~ m{[[:cntrl:][:space:]~^:\\]};
+    die "branch ends with /" if substr($branch, -1) eq '/';
+    die "branch ends with .lock" if substr($branch, -5) eq '.lock';
+    return 1;
 }
 
 =head2 validate_owner_name
@@ -543,14 +543,14 @@ Will raise an exception on invalid input.
 =cut
 
 sub validate_owner_name {
-	my ($self, $owner) = @_;
-	die "owner name not defined" unless defined $owner;
-	die "owner name too long" if length($owner) > 39;
-	die "owner name contains invalid characters" if $owner =~ /[^a-z0-9-]/i;
-	die "owner name contains double hyphens" if $owner =~ /--/;
-	die "owner name contains leading hyphen" if $owner =~ /^-/;
-	die "owner name contains trailing hyphen" if $owner =~ /-$/;
-	return 1;
+    my ($self, $owner) = @_;
+    die "owner name not defined" unless defined $owner;
+    die "owner name too long" if length($owner) > 39;
+    die "owner name contains invalid characters" if $owner =~ /[^a-z0-9-]/i;
+    die "owner name contains double hyphens" if $owner =~ /--/;
+    die "owner name contains leading hyphen" if $owner =~ /^-/;
+    die "owner name contains trailing hyphen" if $owner =~ /-$/;
+    return 1;
 }
 
 =head2 validate_repo_name
@@ -562,11 +562,11 @@ Will raise an exception on invalid input.
 =cut
 
 sub validate_repo_name {
-	my ($self, $repo) = @_;
-	die "repo name not defined" unless defined $repo;
-	die "repo name contains invalid characters" if $repo =~ /[^a-z0-9-]/i;
-	die "repo name too long" if length($repo) > 100;
-	return 1;
+    my ($self, $repo) = @_;
+    die "repo name not defined" unless defined $repo;
+    die "repo name contains invalid characters" if $repo =~ /[^a-z0-9-]/i;
+    die "repo name too long" if length($repo) > 100;
+    return 1;
 }
 
 =head2 validate_args
@@ -576,10 +576,10 @@ Convenience method to apply validation on common parameters.
 =cut
 
 sub validate_args {
-	my ($self, %args) = @_;
-	$self->validate_branch_name($args{branch}) if exists $args{branch};
-	$self->validate_owner_name($args{owner}) if exists $args{owner};
-	$self->validate_repo_name($args{repo}) if exists $args{repo};
+    my ($self, %args) = @_;
+    $self->validate_branch_name($args{branch}) if exists $args{branch};
+    $self->validate_owner_name($args{owner}) if exists $args{owner};
+    $self->validate_repo_name($args{repo}) if exists $args{repo};
 }
 
 sub ryu { shift->{ryu} }
