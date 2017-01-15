@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use feature qw(say);
 
 use IO::Async::Loop;
 use Net::Async::Github;
@@ -17,8 +16,12 @@ $loop->add(
 	)
 );
 
-$gh->rate_limit->on_done(sub {
-	my $limit = shift;
-	my $core = $limit->core;
-	say "There are " . $core->remaining . " requests left, and limit will expire " . from_now($core->seconds_left);
-})->get;
+my $user = $gh->current_user->get;
+printf "User [%s] has %d public repos and was last updated on %s%s\n",
+    $user->login,
+    $user->public_repos,
+    $user->updated_at->to_string,
+    ($user->hireable ? " (available for hire!)" : "")
+;
+
+
