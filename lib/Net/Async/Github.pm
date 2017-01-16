@@ -63,6 +63,8 @@ Accepts the following optional named parameters:
 
 =item * C<mime_type> - the MIME type to use as the C<Accept> header for requests
 
+=item * C<page_cache_size> - number of GET responses to cache. Defaults to 1000, set to 0 to disable.
+
 =back
 
 You probably just wanted C<token>.
@@ -75,7 +77,7 @@ instance to the constructor for a new instance.
 
 sub configure {
     my ($self, %args) = @_;
-    for my $k (grep exists $args{$_}, qw(token endpoints api_key http base_uri mime_type)) {
+    for my $k (grep exists $args{$_}, qw(token endpoints api_key http base_uri mime_type page_cache_size)) {
         $self->{$k} = delete $args{$k};
     }
     $self->SUPER::configure(%args);
