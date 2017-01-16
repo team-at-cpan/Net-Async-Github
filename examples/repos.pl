@@ -17,13 +17,36 @@ $loop->add(
 	)
 );
 
+$gh->core_rate_limit->remaining->subscribe(sub {
+    printf "Have %d Github requests remaining\n", $_;
+});
+
+# List of all repos
 my $repos = $gh->repos
     ->each(sub {
-        printf "* %s has %d open issues and %d forks\n", $_->name, $_->open_issues_count, $_->forks_count;
+        printf "* %s has %d open issues and %d forks\n",
+            $_->name,
+            $_->open_issues_count,
+            $_->forks_count;
     })
-    ->count
-    ->each(sub {
-        printf "Total of %d repos found\n", $_;
+# ... and aggregate stats
+    ->apply(sub {
+        $_->count
+            ->each(sub {
+                printf "Total of %d repos found\n", $_;
+            })
+    }, sub {
+        $_->map('open_issues_count')
+            ->sum
+            ->each(sub {
+                printf "Total of %d open issues found\n", $_;
+            })
+    }, sub {
+        $_->map('forks_count')
+            ->sum
+            ->each(sub {
+                printf "Total of %d forks found\n", $_;
+            })
     })
     ->await;
 
