@@ -634,7 +634,18 @@ sub validate_args {
     $self->validate_repo_name($args{repo}) if exists $args{repo};
 }
 
-sub page_cache_size { 1000 }
+=head2 page_cache_size
+
+Returns the total number of GET responses we'll cache. Default is probably 1000.
+
+=cut
+
+sub page_cache_size { shift->{page_cache_size} //= 1000 }
+
+=head2 page_cache
+
+The page cache instance, likely to be provided by L<Cache::LRU>.
+=cut
 
 sub page_cache {
     $_[0]->{page_cache} //= do {
@@ -643,6 +654,12 @@ sub page_cache {
         )
     }
 }
+
+=head2 ryu
+
+Our L<Ryu::Async> instance, used for instantiating L<Ryu::Source> instances.
+
+=cut
 
 sub ryu { shift->{ryu} }
 
