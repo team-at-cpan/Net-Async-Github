@@ -233,13 +233,35 @@ sub update {
     )
 }
 
+=head2 core_rate_limit
+
+Returns a L<Net::Async::Github::RateLimit::Core> instance which can track rate limits.
+
+=cut
+
 sub core_rate_limit {
     my ($self) = @_;
-    $self->{core_rate_limit} //= Net::Async::Github::RateLimit::Core->new(
-        limit     => Ryu::Observable->new(0),
-        remaining => Ryu::Observable->new(0),
-        reset     => Ryu::Observable->new(0),
-    )
+    $self->{core_rate_limit} //= do {
+        use Variable::Disposition qw(retain_future);
+        use namespace::clean qw(retain_future);
+        my $rl = Net::Async::Github::RateLimit::Core->new(
+            limit     => Ryu::Observable->new(undef),
+            remaining => Ryu::Observable->new(undef),
+            reset     => Ryu::Observable->new(undef),
+        );
+        retain_future(
+            $self->http_get(
+                uri => $self->endpoint('rate_limit')
+            )->on_done(sub {
+                my $data = shift;
+                $log->infof("Data was %s", $data);
+                $rl->limit->set_numeric($data->{resources}{core}{limit});
+                $rl->remaining->set_numeric($data->{resources}{core}{remaining});
+                $rl->reset->set_numeric($data->{resources}{core}{reset});
+            })
+        );
+        $rl;
+    }
 }
 
 =head2 rate_limit
@@ -425,7 +447,7 @@ sub http_get {
         for my $k (qw(Limit Remaining Reset)) {
             if(defined(my $v = $resp->header('X-RateLimit-' . $k))) {
                 my $method = lc $k;
-                $self->core_rate_limit->$method->set($v);
+                $self->core_rate_limit->$method->set_numeric($v);
             }
         }
 
