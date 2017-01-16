@@ -231,7 +231,11 @@ sub rate_limit {
     $self->http_get(
         uri => $self->endpoint('rate_limit')
     )->transform(
-        done => sub { Net::Async::Github::RateLimit->new(%{$_[0]}) }
+        done => sub {
+            Net::Async::Github::RateLimit->new(
+                %{$_[0]}
+            )
+        }
     )
 }
 
@@ -287,7 +291,9 @@ Returns a L<URI> instance.
 
 sub endpoint {
     my ($self, $endpoint, %args) = @_;
-    URI::Template->new($self->endpoints->{$endpoint . '_url'})->process(%args);
+    URI::Template->new(
+        $self->endpoints->{$endpoint . '_url'}
+    )->process(%args);
 }
 
 =head2 http
@@ -306,17 +312,24 @@ sub http {
         $self->add_child(
             my $ua = Net::Async::HTTP->new(
                 fail_on_error            => 1,
-                max_connections_per_host => 4,
+                max_connections_per_host => $self->connections_per_host,
                 pipeline                 => 1,
                 max_in_flight            => 4,
                 decode_content           => 1,
-                timeout                  => 30,
+                timeout                  => $self->timeout,
                 user_agent               => 'Mozilla/4.0 (perl; Net::Async::Github; TEAM@cpan.org)',
             )
         );
         $ua
     }
 }
+
+# Github ratelimit guidelines suggest max 1 request in parallel
+# per user, with 1s between any state-modifying calls. Since this
+# is part of their defined API, we don't expose this in L</configure>.
+sub connections_per_host { 1 }
+
+sub timeout { 60 }
 
 =head2 auth_info
 
