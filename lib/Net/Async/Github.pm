@@ -533,12 +533,9 @@ sub api_get_list {
             my ($data, $resp) = @_;
             # Handle paging - this takes the form of zero or more Link headers like this:
             # Link: <https://api.github.com/user/repos?page=2>; rel="next"
-            if(my @links = $resp->header('Link')) {
-                @links = map { split /\s*,\s*/, $_ } @links;
-                for my $link (@links) {
-                    if($link =~ m{<([^>]+)>; rel="next"}) {
-                        push @pending, $1;
-                    }
+            for my $link (map { split /\s*,\s*/, $_ } $resp->header('Link')) {
+                if($link =~ m{<([^>]+)>; rel="next"}) {
+                    push @pending, URI->new($1);
                 }
             }
 
