@@ -181,7 +181,7 @@ Requires the following named parameters:
 sub head {
     my ($self, %args) = @_;
     die "needs $_" for grep !$args{$_}, qw(owner repo branch);
-    die "invalid branch format" unless $args{branch} =~ m{^(\w+)/(\w+)$};
+    $self->validate_args;
     my $uri = URI->new('https://api.github.com/');
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, qw(git refs heads), $args{branch}
