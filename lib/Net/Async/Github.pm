@@ -36,7 +36,10 @@ use JSON::MaybeXS;
 use Time::Moment;
 use Syntax::Keyword::Try;
 
+use Cache::LRU;
+
 use Ryu::Async;
+use Ryu::Observable;
 use Net::Async::WebSocket::Client;
 
 use Log::Any qw($log);
@@ -222,6 +225,15 @@ sub update {
     )
 }
 
+sub core_rate_limit {
+    my ($self) = @_;
+    $self->{core_rate_limit} //= Net::Async::Github::RateLimit::Core->new(
+        limit     => Ryu::Observable->new(0),
+        remaining => Ryu::Observable->new(0),
+        reset     => Ryu::Observable->new(0),
+    )
+}
+
 =head2 rate_limit
 
 =cut
@@ -388,13 +400,36 @@ sub http_get {
     }
     $args{$_} //= $auth{$_} for keys %auth;
 
-    $log->tracef("GET %s { %s }", ''. $args{uri}, \%args);
+    my $uri = delete $args{uri};
+    $log->tracef("GET %s { %s }", $uri->as_string, \%args);
+    my $cached = $self->page_cache->get($uri->as_string);
+    if($cached) {
+        $args{headers}{'If-None-Match'} = $cached->header('ETag') if $cached->header('ETag');
+        $args{headers}{'If-Modified-Since'} = $cached->header('Last-Modified') if $cached->header('Last-Modified');
+    }
     $self->http->GET(
-        (delete $args{uri}),
-        %args
+        $uri,
+        %args,
     )->then(sub {
         my ($resp) = @_;
         $log->tracef("Github response: %s", $resp->as_string("\n"));
+        # If we had ratelimiting headers, apply them
+        for my $k (qw(Limit Remaining Reset)) {
+            if(defined(my $v = $resp->header('X-RateLimit-' . $k))) {
+                my $method = lc $k;
+                $self->core_rate_limit->$method->set($v);
+            }
+        }
+
+        if($cached && $resp->code == 304) {
+            $resp = $cached
+        } elsif($resp->is_success) {
+            $log->tracef("Caching [%s] with %d byte response", $uri->as_string, $resp->content_length);
+            $self->page_cache->set($uri->as_string => $resp);
+        } else {
+            $log->tracef("Not caching [%s] due to status %d", $resp->code);
+        }
+
         return Future->done(
             { },
             $resp
@@ -595,15 +630,27 @@ sub validate_args {
     $self->validate_repo_name($args{repo}) if exists $args{repo};
 }
 
+sub page_cache_size { 1000 }
+
+sub page_cache {
+    $_[0]->{page_cache} //= do {
+        Cache::LRU->new(
+            size => $_[0]->page_cache_size
+        )
+    }
+}
+
 sub ryu { shift->{ryu} }
 
 sub _add_to_loop {
     my ($self, $loop) = @_;
 
+    # Hand out sources and sinks
     $self->add_child(
         $self->{ryu} = Ryu::Async->new
     );
 
+    # Dynamic updates
     $self->add_child(
         $self->{ws} = Net::Async::WebSocket::Client->new(
             on_raw_frame => $self->curry::weak::on_raw_frame,
