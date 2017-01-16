@@ -366,10 +366,28 @@ sub http {
     }
 }
 
+sub update_limiter {
+    my ($self) = @_;
+    unless($self->{update_limiter}) {
+        # Any modification should wait for this to resolve first
+        $self->{update_limiter} = $self->loop->delay_future(
+            after => 1
+        )->on_ready(sub {
+            delete $self->{update_limiter}
+        });
+        # Limit the next request - not this one
+        return Future->done;
+    }
+    return $self->{update_limiter};
+}
+
 # Github ratelimit guidelines suggest max 1 request in parallel
 # per user, with 1s between any state-modifying calls. Since this
 # is part of their defined API, we don't expose this in L</configure>.
-sub connections_per_host { 1 }
+sub connections_per_host { 4 }
+
+# Like connections, but for data modification - POST, PUT, PATCH etc.
+sub updates_per_host { 1 }
 
 sub timeout { 60 }
 
@@ -568,9 +586,9 @@ sub api_get_list {
     my $refaddr = Scalar::Util::refaddr($f);
     retain_future(
         $self->pending_requests->push([ {
-            id  => $refaddr,
-            src => $src,
-            uri => $args{uri},
+            id     => $refaddr,
+            src    => $src,
+            uri    => $args{uri},
             future => $f,
         } ])->then(sub {
             $f->on_ready(sub {
@@ -582,6 +600,12 @@ sub api_get_list {
     );
     $src
 }
+
+=head2 pending_requests
+
+A list of all pending requests.
+
+=cut
 
 sub pending_requests {
     shift->{pending_requests} //= do {
