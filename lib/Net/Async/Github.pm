@@ -67,6 +67,10 @@ Accepts the following optional named parameters:
 
 You probably just wanted C<token>.
 
+If you're creating a large number of instances, you can avoid
+some disk access overhead by passing C<endpoints> from an existing
+instance to the constructor for a new instance.
+
 =cut
 
 sub configure {
@@ -573,7 +577,7 @@ Will raise an exception on invalid input.
 
 sub validate_branch_name {
     my ($self, $branch) = @_;
-    die "branch is undef" unless defined $branch;
+    die "branch not defined" unless defined $branch;
     die "branch contains path component with leading ." if $branch =~ m{/\.};
     die "branch contains double ." if $branch =~ m{\.\.};
     die "branch contains invalid character(s)" if $branch =~ m{[[:cntrl:][:space:]~^:\\]};
