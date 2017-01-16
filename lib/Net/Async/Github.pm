@@ -496,7 +496,7 @@ sub api_get_list {
     use Variable::Disposition qw(retain_future);
     use Scalar::Util qw(refaddr);
     use Future::Utils qw(fmap0);
-    use namespace::clean qw(retain_future refaddr);
+    use namespace::clean qw(retain_future fmap0 refaddr);
 
     my ($self, %args) = @_;
     my $label = $args{endpoint}
