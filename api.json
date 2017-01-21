@@ -17,6 +17,54 @@
 			{ "name" : "default_branch" },
 			{ "name" : "id" }
 		]
+	}, {
+		"package": "User",
+		"method_list": [
+			{ "name" : "login" },
+			{ "name" : "id" },
+			{ "name" : "avatar_url", "as":"URI" },
+			{ "name" : "gravatar_id" },
+			{ "name" : "url" },
+			{ "name" : "html_url", "as":"URI" },
+			{ "name" : "followers_url", "as":"URI" },
+			{ "name" : "following_url", "as":"URI" },
+			{ "name" : "gists_url", "as":"URI" },
+			{ "name" : "starred_url", "as":"URI" },
+			{ "name" : "subscriptions_url", "as":"URI" },
+			{ "name" : "organizations_url", "as":"URI" },
+			{ "name" : "repos_url", "as":"URI" },
+			{ "name" : "events_url" , "as":"URI"},
+			{ "name" : "received_events_url", "as":"URI" },
+			{ "name" : "type" },
+			{ "name" : "site_admin", "type": "boolean" },
+			{ "name" : "name" },
+			{ "name" : "company" },
+			{ "name" : "blog" },
+			{ "name" : "location" },
+			{ "name" : "email" },
+			{ "name" : "hireable", "type": "boolean" },
+			{ "name" : "bio" },
+			{ "name" : "public_repos" },
+			{ "name" : "public_gists" },
+			{ "name" : "followers" },
+			{ "name" : "following" },
+			{ "name" : "created_at", "type": "timestamp" },
+			{ "name" : "updated_at", "type": "timestamp" },
+			{ "name" : "total_private_repos" },
+			{ "name" : "owned_private_repos" },
+			{ "name" : "private_gists" },
+			{ "name" : "disk_usage" },
+			{ "name" : "collaborators" },
+			{ "name" : "plan", "as": "Net::Async::Github::Plan" }
+		]
+	}, {
+		"package": "Plan",
+		"method_list": [
+			{ "name" : "name" },
+			{ "name" : "space" },
+			{ "name" : "private_repos" },
+			{ "name" : "collaborators" }
+		]
 	} ]
 }
 
