@@ -58,7 +58,17 @@ Provides an accessor for C<[% method.name %]>.
 
 =cut
 
-sub [% method.method_name %] { shift->{[% method.name %]} }
+sub [% method.method_name %] {
+[% IF method.as -%]
+    $_[0]->{[% method.name %]} = [% method.as %]->new($_[0]->{[% method.name %]}) unless ref $_[0]->{[% method.name %]};
+[% END -%]
+    shift->{[% method.name %]}
+[% SWITCH method.type -%]
+[% CASE 'boolean' -%]
+    ? 1 : 0
+[% CASE -%]
+[% END -%]
+}
 
 [% END -%]
 1;
