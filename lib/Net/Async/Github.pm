@@ -108,7 +108,7 @@ Resolves to the current status.
 sub reopen {
     my ($self, %args) = @_;
     die "needs $_" for grep !$args{$_}, qw(owner repo id);
-    $self->validate_args;
+    $self->validate_args(%args);
     my $uri = URI->new('https://api.github.com/');
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, 'pulls', $args{id}
@@ -150,7 +150,7 @@ Resolves to the current status.
 sub pr {
     my ($self, %args) = @_;
     die "needs $_" for grep !$args{$_}, qw(owner repo id);
-    $self->validate_args;
+    $self->validate_args(%args);
     my $uri = URI->new('https://api.github.com/');
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, 'pulls', $args{id}
@@ -194,7 +194,7 @@ Requires the following named parameters:
 sub head {
     my ($self, %args) = @_;
     die "needs $_" for grep !$args{$_}, qw(owner repo branch);
-    $self->validate_args;
+    $self->validate_args(%args);
     my $uri = URI->new('https://api.github.com/');
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, qw(git refs heads), $args{branch}
