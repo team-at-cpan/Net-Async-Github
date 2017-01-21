@@ -28,7 +28,9 @@ Provides an accessor for C<login>.
 
 =cut
 
-sub login { shift->{login} }
+sub login {
+    shift->{login}
+}
 
 =head2 id
 
@@ -36,7 +38,9 @@ Provides an accessor for C<id>.
 
 =cut
 
-sub id { shift->{id} }
+sub id {
+    shift->{id}
+}
 
 =head2 avatar_url
 
@@ -44,7 +48,10 @@ Provides an accessor for C<avatar_url>.
 
 =cut
 
-sub avatar_url { shift->{avatar_url} }
+sub avatar_url {
+    $_[0]->{avatar_url} = URI->new($_[0]->{avatar_url}) unless ref $_[0]->{avatar_url};
+    shift->{avatar_url}
+}
 
 =head2 gravatar_id
 
@@ -52,7 +59,9 @@ Provides an accessor for C<gravatar_id>.
 
 =cut
 
-sub gravatar_id { shift->{gravatar_id} }
+sub gravatar_id {
+    shift->{gravatar_id}
+}
 
 =head2 url
 
@@ -60,7 +69,9 @@ Provides an accessor for C<url>.
 
 =cut
 
-sub url { shift->{url} }
+sub url {
+    shift->{url}
+}
 
 =head2 html_url
 
@@ -68,7 +79,10 @@ Provides an accessor for C<html_url>.
 
 =cut
 
-sub html_url { shift->{html_url} }
+sub html_url {
+    $_[0]->{html_url} = URI->new($_[0]->{html_url}) unless ref $_[0]->{html_url};
+    shift->{html_url}
+}
 
 =head2 followers_url
 
@@ -76,7 +90,10 @@ Provides an accessor for C<followers_url>.
 
 =cut
 
-sub followers_url { shift->{followers_url} }
+sub followers_url {
+    $_[0]->{followers_url} = URI->new($_[0]->{followers_url}) unless ref $_[0]->{followers_url};
+    shift->{followers_url}
+}
 
 =head2 following_url
 
@@ -84,7 +101,10 @@ Provides an accessor for C<following_url>.
 
 =cut
 
-sub following_url { shift->{following_url} }
+sub following_url {
+    $_[0]->{following_url} = URI->new($_[0]->{following_url}) unless ref $_[0]->{following_url};
+    shift->{following_url}
+}
 
 =head2 gists_url
 
@@ -92,7 +112,10 @@ Provides an accessor for C<gists_url>.
 
 =cut
 
-sub gists_url { shift->{gists_url} }
+sub gists_url {
+    $_[0]->{gists_url} = URI->new($_[0]->{gists_url}) unless ref $_[0]->{gists_url};
+    shift->{gists_url}
+}
 
 =head2 starred_url
 
@@ -100,7 +123,10 @@ Provides an accessor for C<starred_url>.
 
 =cut
 
-sub starred_url { shift->{starred_url} }
+sub starred_url {
+    $_[0]->{starred_url} = URI->new($_[0]->{starred_url}) unless ref $_[0]->{starred_url};
+    shift->{starred_url}
+}
 
 =head2 subscriptions_url
 
@@ -108,7 +134,10 @@ Provides an accessor for C<subscriptions_url>.
 
 =cut
 
-sub subscriptions_url { shift->{subscriptions_url} }
+sub subscriptions_url {
+    $_[0]->{subscriptions_url} = URI->new($_[0]->{subscriptions_url}) unless ref $_[0]->{subscriptions_url};
+    shift->{subscriptions_url}
+}
 
 =head2 organizations_url
 
@@ -116,7 +145,10 @@ Provides an accessor for C<organizations_url>.
 
 =cut
 
-sub organizations_url { shift->{organizations_url} }
+sub organizations_url {
+    $_[0]->{organizations_url} = URI->new($_[0]->{organizations_url}) unless ref $_[0]->{organizations_url};
+    shift->{organizations_url}
+}
 
 =head2 repos_url
 
@@ -124,7 +156,10 @@ Provides an accessor for C<repos_url>.
 
 =cut
 
-sub repos_url { shift->{repos_url} }
+sub repos_url {
+    $_[0]->{repos_url} = URI->new($_[0]->{repos_url}) unless ref $_[0]->{repos_url};
+    shift->{repos_url}
+}
 
 =head2 events_url
 
@@ -132,7 +167,10 @@ Provides an accessor for C<events_url>.
 
 =cut
 
-sub events_url { shift->{events_url} }
+sub events_url {
+    $_[0]->{events_url} = URI->new($_[0]->{events_url}) unless ref $_[0]->{events_url};
+    shift->{events_url}
+}
 
 =head2 received_events_url
 
@@ -140,7 +178,10 @@ Provides an accessor for C<received_events_url>.
 
 =cut
 
-sub received_events_url { shift->{received_events_url} }
+sub received_events_url {
+    $_[0]->{received_events_url} = URI->new($_[0]->{received_events_url}) unless ref $_[0]->{received_events_url};
+    shift->{received_events_url}
+}
 
 =head2 type
 
@@ -148,7 +189,9 @@ Provides an accessor for C<type>.
 
 =cut
 
-sub type { shift->{type} }
+sub type {
+    shift->{type}
+}
 
 =head2 site_admin
 
@@ -156,7 +199,10 @@ Provides an accessor for C<site_admin>.
 
 =cut
 
-sub site_admin { shift->{site_admin} }
+sub site_admin {
+    shift->{site_admin}
+    ? 1 : 0
+}
 
 =head2 name
 
@@ -164,7 +210,9 @@ Provides an accessor for C<name>.
 
 =cut
 
-sub name { shift->{name} }
+sub name {
+    shift->{name}
+}
 
 =head2 company
 
@@ -172,7 +220,9 @@ Provides an accessor for C<company>.
 
 =cut
 
-sub company { shift->{company} }
+sub company {
+    shift->{company}
+}
 
 =head2 blog
 
@@ -180,7 +230,9 @@ Provides an accessor for C<blog>.
 
 =cut
 
-sub blog { shift->{blog} }
+sub blog {
+    shift->{blog}
+}
 
 =head2 location
 
@@ -188,7 +240,9 @@ Provides an accessor for C<location>.
 
 =cut
 
-sub location { shift->{location} }
+sub location {
+    shift->{location}
+}
 
 =head2 email
 
@@ -196,7 +250,9 @@ Provides an accessor for C<email>.
 
 =cut
 
-sub email { shift->{email} }
+sub email {
+    shift->{email}
+}
 
 =head2 hireable
 
@@ -204,7 +260,10 @@ Provides an accessor for C<hireable>.
 
 =cut
 
-sub hireable { shift->{hireable} }
+sub hireable {
+    shift->{hireable}
+    ? 1 : 0
+}
 
 =head2 bio
 
@@ -212,7 +271,9 @@ Provides an accessor for C<bio>.
 
 =cut
 
-sub bio { shift->{bio} }
+sub bio {
+    shift->{bio}
+}
 
 =head2 public_repos
 
@@ -220,7 +281,9 @@ Provides an accessor for C<public_repos>.
 
 =cut
 
-sub public_repos { shift->{public_repos} }
+sub public_repos {
+    shift->{public_repos}
+}
 
 =head2 public_gists
 
@@ -228,7 +291,9 @@ Provides an accessor for C<public_gists>.
 
 =cut
 
-sub public_gists { shift->{public_gists} }
+sub public_gists {
+    shift->{public_gists}
+}
 
 =head2 followers
 
@@ -236,7 +301,9 @@ Provides an accessor for C<followers>.
 
 =cut
 
-sub followers { shift->{followers} }
+sub followers {
+    shift->{followers}
+}
 
 =head2 following
 
@@ -244,7 +311,9 @@ Provides an accessor for C<following>.
 
 =cut
 
-sub following { shift->{following} }
+sub following {
+    shift->{following}
+}
 
 =head2 created_at
 
@@ -252,7 +321,9 @@ Provides an accessor for C<created_at>.
 
 =cut
 
-sub created_at { shift->{created_at} }
+sub created_at {
+    shift->{created_at}
+}
 
 =head2 updated_at
 
@@ -260,7 +331,9 @@ Provides an accessor for C<updated_at>.
 
 =cut
 
-sub updated_at { shift->{updated_at} }
+sub updated_at {
+    shift->{updated_at}
+}
 
 =head2 total_private_repos
 
@@ -268,7 +341,9 @@ Provides an accessor for C<total_private_repos>.
 
 =cut
 
-sub total_private_repos { shift->{total_private_repos} }
+sub total_private_repos {
+    shift->{total_private_repos}
+}
 
 =head2 owned_private_repos
 
@@ -276,7 +351,9 @@ Provides an accessor for C<owned_private_repos>.
 
 =cut
 
-sub owned_private_repos { shift->{owned_private_repos} }
+sub owned_private_repos {
+    shift->{owned_private_repos}
+}
 
 =head2 private_gists
 
@@ -284,7 +361,9 @@ Provides an accessor for C<private_gists>.
 
 =cut
 
-sub private_gists { shift->{private_gists} }
+sub private_gists {
+    shift->{private_gists}
+}
 
 =head2 disk_usage
 
@@ -292,7 +371,9 @@ Provides an accessor for C<disk_usage>.
 
 =cut
 
-sub disk_usage { shift->{disk_usage} }
+sub disk_usage {
+    shift->{disk_usage}
+}
 
 =head2 collaborators
 
@@ -300,7 +381,9 @@ Provides an accessor for C<collaborators>.
 
 =cut
 
-sub collaborators { shift->{collaborators} }
+sub collaborators {
+    shift->{collaborators}
+}
 
 =head2 plan
 
@@ -308,7 +391,10 @@ Provides an accessor for C<plan>.
 
 =cut
 
-sub plan { shift->{plan} }
+sub plan {
+    $_[0]->{plan} = Net::Async::Github::Plan->new($_[0]->{plan}) unless ref $_[0]->{plan};
+    shift->{plan}
+}
 
 1;
 

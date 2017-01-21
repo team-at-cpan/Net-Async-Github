@@ -27,7 +27,10 @@ Provides an accessor for C<url>.
 
 =cut
 
-sub url { shift->{url} }
+sub url {
+    $_[0]->{url} = URI->new($_[0]->{url}) unless ref $_[0]->{url};
+    shift->{url}
+}
 
 =head2 name
 
@@ -35,7 +38,9 @@ Provides an accessor for C<name>.
 
 =cut
 
-sub name { shift->{name} }
+sub name {
+    shift->{name}
+}
 
 =head2 full_name
 
@@ -43,7 +48,9 @@ Provides an accessor for C<full_name>.
 
 =cut
 
-sub full_name { shift->{full_name} }
+sub full_name {
+    shift->{full_name}
+}
 
 =head2 description
 
@@ -51,7 +58,9 @@ Provides an accessor for C<description>.
 
 =cut
 
-sub description { shift->{description} }
+sub description {
+    shift->{description}
+}
 
 =head2 fork
 
@@ -59,7 +68,9 @@ Provides an accessor for C<fork>.
 
 =cut
 
-sub fork { shift->{fork} }
+sub fork {
+    shift->{fork}
+}
 
 =head2 private
 
@@ -67,7 +78,9 @@ Provides an accessor for C<private>.
 
 =cut
 
-sub private { shift->{private} }
+sub private {
+    shift->{private}
+}
 
 =head2 html_url
 
@@ -75,7 +88,9 @@ Provides an accessor for C<html_url>.
 
 =cut
 
-sub html_url { shift->{html_url} }
+sub html_url {
+    shift->{html_url}
+}
 
 =head2 forks_count
 
@@ -83,7 +98,9 @@ Provides an accessor for C<forks_count>.
 
 =cut
 
-sub forks_count { shift->{forks_count} }
+sub forks_count {
+    shift->{forks_count}
+}
 
 =head2 stargazers_count
 
@@ -91,7 +108,9 @@ Provides an accessor for C<stargazers_count>.
 
 =cut
 
-sub stargazers_count { shift->{stargazers_count} }
+sub stargazers_count {
+    shift->{stargazers_count}
+}
 
 =head2 watchers_count
 
@@ -99,7 +118,9 @@ Provides an accessor for C<watchers_count>.
 
 =cut
 
-sub watchers_count { shift->{watchers_count} }
+sub watchers_count {
+    shift->{watchers_count}
+}
 
 =head2 open_issues_count
 
@@ -107,7 +128,9 @@ Provides an accessor for C<open_issues_count>.
 
 =cut
 
-sub open_issues_count { shift->{open_issues_count} }
+sub open_issues_count {
+    shift->{open_issues_count}
+}
 
 =head2 size
 
@@ -115,7 +138,9 @@ Provides an accessor for C<size>.
 
 =cut
 
-sub size { shift->{size} }
+sub size {
+    shift->{size}
+}
 
 =head2 default_branch
 
@@ -123,7 +148,9 @@ Provides an accessor for C<default_branch>.
 
 =cut
 
-sub default_branch { shift->{default_branch} }
+sub default_branch {
+    shift->{default_branch}
+}
 
 =head2 id
 
@@ -131,7 +158,9 @@ Provides an accessor for C<id>.
 
 =cut
 
-sub id { shift->{id} }
+sub id {
+    shift->{id}
+}
 
 1;
 

@@ -25,7 +25,9 @@ Provides an accessor for C<name>.
 
 =cut
 
-sub name { shift->{name} }
+sub name {
+    shift->{name}
+}
 
 =head2 space
 
@@ -33,7 +35,9 @@ Provides an accessor for C<space>.
 
 =cut
 
-sub space { shift->{space} }
+sub space {
+    shift->{space}
+}
 
 =head2 private_repos
 
@@ -41,7 +45,9 @@ Provides an accessor for C<private_repos>.
 
 =cut
 
-sub private_repos { shift->{private_repos} }
+sub private_repos {
+    shift->{private_repos}
+}
 
 =head2 collaborators
 
@@ -49,7 +55,9 @@ Provides an accessor for C<collaborators>.
 
 =cut
 
-sub collaborators { shift->{collaborators} }
+sub collaborators {
+    shift->{collaborators}
+}
 
 1;
 
