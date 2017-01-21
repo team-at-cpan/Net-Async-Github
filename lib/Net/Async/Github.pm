@@ -44,6 +44,8 @@ use Net::Async::WebSocket::Client;
 
 use Log::Any qw($log);
 
+use Net::Async::Github::User;
+use Net::Async::Github::Plan;
 use Net::Async::Github::Repository;
 use Net::Async::Github::RateLimit;
 
