@@ -283,6 +283,21 @@ sub rate_limit {
     )
 }
 
+sub current_user {
+    my ($self, %args) = @_;
+    $self->validate_args(%args);
+    $self->http_get(
+        uri => $self->endpoint('current_user')
+    )->transform(
+        done => sub {
+            Net::Async::Github::User->new(
+                %{$_[0]},
+                github => $self,
+            )
+        }
+    )
+}
+
 =head1 METHODS - Internal
 
 The following methods are used internally. They're not expected to be
