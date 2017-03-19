@@ -17,11 +17,17 @@ my $tt = Template->new;
 
 for my $def (@{$in->{packages}}) {
 	$def->{base} = $base;
+    for(@{$def->{method_list}}) {
+        ($_->{method_name} = $_->{name}) =~ s/([A-Z]+)/_\L$1/g ;
+        if(($_->{type} // '') eq 'timestamp') {
+            $_->{as} = 'Time::Moment';
+            delete $_->{type};
+        }
+    }
 	$def->{use_list} = [
 	   	uniq map $_->{as},
 	   		grep exists $_->{as}, @{$def->{method_list}}
 	];
-	($_->{method_name} = $_->{name}) =~ s/([A-Z]+)/_\L$1/g for @{$def->{method_list}};
 
 	$tt->process(\<<'EOF'
 package Net::Async::[% base %]::[% package %];
@@ -60,7 +66,14 @@ Provides an accessor for C<[% method.name %]>.
 
 sub [% method.method_name %] {
 [% IF method.as -%]
-    $_[0]->{[% method.name %]} = [% method.as %]->new($_[0]->{[% method.name %]}) unless ref $_[0]->{[% method.name %]};
+    $_[0]->{[% method.name %]} =
+[%  SWITCH method.as -%]
+[%   CASE 'Time::Moment' -%]
+    (defined($_[0]->{[% method.name %]}) && length($_[0]->{[% method.name %]}) ? Time::Moment->from_string($_[0]->{[% method.name %]}) : undef)
+[%   CASE -%]
+     [% method.as %]->new($_[0]->{[% method.name %]})
+[%  END -%]
+        unless ref $_[0]->{[% method.name %]};
 [% END -%]
     shift->{[% method.name %]}
 [% SWITCH method.type -%]

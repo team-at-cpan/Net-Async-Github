@@ -21,13 +21,20 @@ $gh->core_rate_limit->remaining->subscribe(sub {
     printf "Have %d Github requests remaining\n", $_;
 });
 
+open my $missing, '>:encoding(UTF-8)', 'missing.lst' or die $!;
 # List of all repos
-my $repos = $gh->repos
+my $user = shift;
+my $repos = $gh->repos($user ? (owner => $user) : ())
+    ->filter(sub { $_->{owner}{login} eq 'regentmarkets' })
     ->each(sub {
         printf "* %s has %d open issues and %d forks\n",
             $_->name,
             $_->open_issues_count,
             $_->forks_count;
+            use Data::Dumper;
+            print Dumper($_->owner);
+        printf ">>> %s/%s\n", $_->owner->{login}, $_->name;
+        $missing->print($_->name . "\n") unless -d '/home/git/regentmarkets/' . $_->name;
     })
 # ... and aggregate stats
     ->apply(sub {
@@ -46,6 +53,13 @@ my $repos = $gh->repos
             ->sum
             ->each(sub {
                 printf "Total of %d forks found\n", $_;
+            })
+    })
+# also get branch info
+    ->apply(sub {
+        $_->flat_map('branches')
+            ->each(sub {
+                printf "found branch called %s\n", $_->name
             })
     })
     ->await;

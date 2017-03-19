@@ -44,12 +44,42 @@ use Net::Async::WebSocket::Client;
 
 use Log::Any qw($log);
 
+use Net::Async::Github::Branch;
 use Net::Async::Github::User;
 use Net::Async::Github::Plan;
 use Net::Async::Github::Repository;
 use Net::Async::Github::RateLimit;
 
 my $json = JSON::MaybeXS->new;
+
+=head1 METHODS
+
+=head2 current_user
+
+Returns information about the current user.
+
+ my $user = $gh->current_user->get;
+ printf "User [%s] has %d public repos and was last updated on %s%s\n",
+  $user->login, $user->public_repos, $user->updated_at->to_string
+
+Resolves to a L<Net::Async::Github::User> instance.
+
+=cut
+
+sub current_user {
+    my ($self, %args) = @_;
+    $self->validate_args(%args);
+    $self->http_get(
+        uri => $self->endpoint('current_user')
+    )->transform(
+        done => sub {
+            Net::Async::Github::User->new(
+                %{$_[0]},
+                github => $self,
+            )
+        }
+    )
+}
 
 =head2 configure
 
@@ -69,7 +99,8 @@ Accepts the following optional named parameters:
 
 =back
 
-You probably just wanted C<token>.
+B< You probably just want C<token> >, defaults should be fine for the
+other settings.
 
 If you're creating a large number of instances, you can avoid
 some disk access overhead by passing C<endpoints> from an existing
@@ -109,7 +140,7 @@ sub reopen {
     my ($self, %args) = @_;
     die "needs $_" for grep !$args{$_}, qw(owner repo id);
     $self->validate_args(%args);
-    my $uri = URI->new('https://api.github.com/');
+    my $uri = URI->new($self->base_uri);
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, 'pulls', $args{id}
     );
@@ -151,7 +182,7 @@ sub pr {
     my ($self, %args) = @_;
     die "needs $_" for grep !$args{$_}, qw(owner repo id);
     $self->validate_args(%args);
-    my $uri = URI->new('https://api.github.com/');
+    my $uri = $self->base_uri;
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, 'pulls', $args{id}
     );
@@ -165,11 +196,72 @@ sub pr {
     )
 }
 
+sub Net::Async::Github::Repository::branches {
+    my ($self, %args) = @_;
+    my $gh = $self->github;
+	$gh->validate_args(%args);
+    $gh->api_get_list(
+        uri   => $self->branches_url->process,
+        class => 'Net::Async::Github::Branch',
+    )
+}
+
 sub repos {
     my ($self, %args) = @_;
+	if(my $user = delete $args{owner}) {
+        $self->validate_owner_name($user);
+        $self->api_get_list(
+            endpoint => 'user_repositories',
+            endpoint_args => {
+                user => $user,
+            },
+            class => 'Net::Async::Github::Repository',
+        )
+	} else {
+        $self->api_get_list(
+            endpoint => 'current_user_repositories',
+            class => 'Net::Async::Github::Repository',
+        )
+    }
+}
+
+=head2 user
+
+Returns information about the given user.
+
+=cut
+
+sub user {
+    my ($self, $user, %args) = @_;
+    $self->validate_owner_name($user);
+    $self->http_get(
+        uri => $self->endpoint(
+            'user',
+            user => $user
+        ),
+    )->transform(
+        done => sub {
+            Net::Async::Github::User->new(
+                %{$_[0]},
+                github => $self,
+            )
+        }
+    )
+}
+
+=head2 users
+
+Iterates through all users. This is a good way to exhaust your 5000-query
+ratelimiting quota.
+
+=cut
+
+sub users {
+    my ($self, %args) = @_;
+    $self->validate_args(%args);
     $self->api_get_list(
-        endpoint => 'current_user_repositories',
-        class => 'Net::Async::Github::Repository',
+        uri   => '/users',
+        class => 'Net::Async::Github::User',
     )
 }
 
@@ -195,7 +287,7 @@ sub head {
     my ($self, %args) = @_;
     die "needs $_" for grep !$args{$_}, qw(owner repo branch);
     $self->validate_args(%args);
-    my $uri = URI->new('https://api.github.com/');
+    my $uri = $self->base_uri;
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, qw(git refs heads), $args{branch}
     );
@@ -217,7 +309,7 @@ sub update {
     my ($self, %args) = @_;
     die "needs $_" for grep !$args{$_}, qw(owner repo branch head);
     $self->validate_branch_name($args{branch});
-    my $uri = URI->new('https://api.github.com/');
+    my $uri = $self->base_uri;
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, qw(merges)
     );
@@ -278,21 +370,6 @@ sub rate_limit {
         done => sub {
             Net::Async::Github::RateLimit->new(
                 %{$_[0]}
-            )
-        }
-    )
-}
-
-sub current_user {
-    my ($self, %args) = @_;
-    $self->validate_args(%args);
-    $self->http_get(
-        uri => $self->endpoint('current_user')
-    )->transform(
-        done => sub {
-            Net::Async::Github::User->new(
-                %{$_[0]},
-                github => $self,
             )
         }
     )
@@ -448,7 +525,11 @@ The L<URI> for requests. Defaults to L<https://api.github.com>.
 
 =cut
 
-sub base_uri { shift->{base_uri} //= URI->new('https://api.github.com') }
+sub base_uri {
+    (
+        shift->{base_uri} //= URI->new('https://api.github.com')
+    )->clone
+}
 
 =head2 http_get
 
@@ -548,8 +629,10 @@ sub api_get_list {
     ? $self->endpoint(
         $args{endpoint},
         %{$args{endpoint_args}}
-    ) : URI->new(
-        $self->base_uri . $args{uri}
+    ) : ref $args{uri}
+    ? $args{uri}
+    : URI->new(
+        $self->base_uri . delete($args{uri})
     );
 
     my $per_page = (delete $args{per_page}) || 10;
@@ -605,7 +688,7 @@ sub api_get_list {
         $self->pending_requests->push([ {
             id     => $refaddr,
             src    => $src,
-            uri    => $args{uri},
+            uri    => $uri,
             future => $f,
         } ])->then(sub {
             $f->on_ready(sub {
