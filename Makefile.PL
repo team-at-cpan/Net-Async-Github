@@ -25,6 +25,7 @@ my %WriteMakefileArgs = (
   "NAME" => "Net::Async::Github",
   "PREREQ_PM" => {
     "Cache::LRU" => "0.04",
+    "Dir::Self" => 0,
     "File::ShareDir" => "1.102",
     "Future" => "0.34",
     "IO::Async::Notifier" => "0.71",
@@ -35,7 +36,8 @@ my %WriteMakefileArgs = (
     "Syntax::Keyword::Try" => "0.04",
     "Time::Moment" => "0.41",
     "URI" => "1.71",
-    "URI::Template" => "0.22"
+    "URI::Template" => "0.22",
+    "indirect" => 0
   },
   "TEST_REQUIRES" => {
     "ExtUtils::MakeMaker" => 0,
@@ -45,7 +47,7 @@ my %WriteMakefileArgs = (
     "Test::CheckDeps" => "0.010",
     "Test::More" => "0.94"
   },
-  "VERSION" => "0.001",
+  "VERSION" => "0.002",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -54,6 +56,7 @@ my %WriteMakefileArgs = (
 
 my %FallbackPrereqs = (
   "Cache::LRU" => "0.04",
+  "Dir::Self" => 0,
   "ExtUtils::MakeMaker" => 0,
   "File::ShareDir" => "1.102",
   "File::Spec" => 0,
@@ -70,7 +73,8 @@ my %FallbackPrereqs = (
   "Test::More" => "0.94",
   "Time::Moment" => "0.41",
   "URI" => "1.71",
-  "URI::Template" => "0.22"
+  "URI::Template" => "0.22",
+  "indirect" => 0
 );
 
 
