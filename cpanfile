@@ -10,6 +10,7 @@ requires 'Path::Tiny', '>= 0.098';
 requires 'Syntax::Keyword::Try', '>= 0.04';
 requires 'Time::Moment', '>= 0.41';
 requires 'Cache::LRU', '>= 0.04';
+requires 'IO::Async::Notifier', '>= 0.71';
 
 recommends 'Net::Async::HTTP', '>= 0.41';
 recommends 'IO::Async::SSL', '>= 0.19';
