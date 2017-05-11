@@ -1,3 +1,5 @@
+requires 'indirect', 0;
+requires 'Dir::Self', 0;
 requires 'Future', '>= 0.34';
 requires 'URI', '>= 1.71';
 requires 'URI::Template', '>= 0.22';

@@ -3,7 +3,7 @@ package Net::Async::Github;
 use strict;
 use warnings;
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 use parent qw(IO::Async::Notifier);
 
@@ -28,7 +28,10 @@ This is a basic wrapper for Github's API.
 
 =cut
 
+no indirect;
+
 use Future;
+use Dir::Self;
 use URI;
 use URI::QueryParam;
 use URI::Template;
@@ -401,19 +404,16 @@ templates, used by L</endpoint>.
 
 sub endpoints {
     my ($self) = @_;
-    $self->{endpoints} ||= do {
-        require File::ShareDir;
-        require Path::Tiny;
-        $json->decode(
-            Path::Tiny::path(
-                'share/endpoints.json' //
-                File::ShareDir::dist_file(
-                    'Net-Async-Github',
-                    'endpoints.json'
-                )
-            )->slurp_utf8
-        );
-    }
+	$self->{endpoints} ||= do {
+        my $path = Path::Tiny::path(__DIR__)->parent(3)->child('share/endpoints.json');
+        $path = Path::Tiny::path(
+            File::ShareDir::dist_file(
+                'Net-Async-Github',
+                'endpoints.json'
+            )
+        ) unless $path->exists;
+        $json->decode($path->slurp_utf8)
+    };
 }
 
 =head2 endpoint

@@ -1,6 +1,10 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+    Bugs fixed:
+
+    * endpoints.json was not being picked up correctly after installation
+    * IO::Async dependency missing in cpanfile (thanks to DBOOK for catching this)
 
 0.001     2017-05-11 22:46:54+08:00 Asia/Kuala_Lumpur
 	* Initial release
