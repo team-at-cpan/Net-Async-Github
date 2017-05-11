@@ -348,7 +348,7 @@ sub core_rate_limit {
                 uri => $self->endpoint('rate_limit')
             )->on_done(sub {
                 my $data = shift;
-                $log->infof("Data was %s", $data);
+                $log->tracef("Github rate limit response was %s", $data);
                 $rl->limit->set_numeric($data->{resources}{core}{limit});
                 $rl->remaining->set_numeric($data->{resources}{core}{remaining});
                 $rl->reset->set_numeric($data->{resources}{core}{reset});
@@ -550,6 +550,7 @@ sub http_get {
     $log->tracef("GET %s { %s }", $uri->as_string, \%args);
     my $cached = $self->page_cache->get($uri->as_string);
     if($cached) {
+        $log->tracef("Had cached page data, etag %s and last modified %s", $cached->header('ETag'), $cached->header('Last-Modified'));
         $args{headers}{'If-None-Match'} = $cached->header('ETag') if $cached->header('ETag');
         $args{headers}{'If-Modified-Since'} = $cached->header('Last-Modified') if $cached->header('Last-Modified');
     }
@@ -835,5 +836,5 @@ Tom Molesworth <TEAM@cpan.org>
 
 =head1 LICENSE
 
-Copyright Tom Molesworth 2015-2017. Licensed under the same terms as Perl itself.
+Copyright Tom Molesworth 2014-2017. Licensed under the same terms as Perl itself.
 

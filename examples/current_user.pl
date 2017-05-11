@@ -1,13 +1,12 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use feature qw(say);
 
 use IO::Async::Loop;
 use Net::Async::Github;
 use Time::Duration;
 
-use Log::Any::Adapter qw(Stdout);
+use Log::Any::Adapter qw(Stdout), log_level => 'INFO';
 
 my $token = shift or die "need a token";
 my $loop = IO::Async::Loop->new;
