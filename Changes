@@ -1,6 +1,12 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+    No new features.
+
+    Bugs fixed:
+
+    * Net::Async::HTTP and Net::Async::WebSocket listed as explicit dependencies
+
 
 0.002     2017-05-12 00:11:11+08:00 Asia/Kuala_Lumpur
     Bugs fixed:
