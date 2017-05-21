@@ -3,6 +3,8 @@ package Net::Async::Github::User;
 use strict;
 use warnings;
 
+# VERSION
+
 use parent qw(Net::Async::Github::Common);
 
 =head1 NAME
