@@ -1,10 +1,19 @@
 package Net::Async::Github::Common;
+
 use strict;
 use warnings;
 
+# VERSION
+
+=head1 NAME
+
+Net::Async::Github::Common - common base class for entities
+
+=head1 METHODS
+
 =head2 new
 
-Instantiates.
+Instantiates. This will expect the L</github> attribute to be passed.
 
 =cut
 
@@ -13,6 +22,12 @@ sub new {
 	die "no ->github provided" unless $self->github;
 	$self
 }
+
+=head2 github
+
+Returns the top-level L<Net::Async::Github> instance.
+
+=cut
 
 sub github { shift->{github} }
 
