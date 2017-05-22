@@ -250,6 +250,9 @@ sub repos {
 	} else {
         $self->api_get_list(
             endpoint => 'current_user_repositories',
+            endpoint_args => {
+                visibility => $args{visibility} // 'all',
+            },
             class => 'Net::Async::Github::Repository',
         )
     }
