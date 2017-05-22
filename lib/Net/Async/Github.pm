@@ -49,6 +49,7 @@ use Log::Any qw($log);
 
 use Net::Async::Github::Branch;
 use Net::Async::Github::User;
+use Net::Async::Github::Team;
 use Net::Async::Github::Plan;
 use Net::Async::Github::Repository;
 use Net::Async::Github::RateLimit;
