@@ -5,6 +5,7 @@ requires 'URI', '>= 1.71';
 requires 'URI::Template', '>= 0.22';
 requires 'JSON::MaybeXS', 0;
 requires 'File::ShareDir', '>= 1.102';
+requires 'Ryu', '>= 0.015';
 requires 'Ryu::Async', '>= 0.002';
 requires 'Log::Any', '>= 1.045';
 requires 'JSON::MaybeXS', '>= 1.003008';
