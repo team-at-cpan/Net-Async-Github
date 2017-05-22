@@ -200,6 +200,15 @@ sub pr {
     )
 }
 
+sub teams {
+    my ($self, %args) = @_;
+	$self->validate_args(%args);
+    $self->api_get_list(
+        uri   => $self->endpoint('team', org => $args{organisation}),
+        class => 'Net::Async::Github::Team',
+    )
+}
+
 sub Net::Async::Github::Repository::branches {
     my ($self, %args) = @_;
     my $gh = $self->github;
@@ -207,6 +216,23 @@ sub Net::Async::Github::Repository::branches {
     $gh->api_get_list(
         uri   => $self->branches_url->process,
         class => 'Net::Async::Github::Branch',
+    )
+}
+
+sub Net::Async::Github::Repository::grant_team {
+    my ($self, %args) = @_;
+    my $gh = $self->github;
+	$gh->validate_args(%args);
+    $self->github->http_put(
+        uri => $self->github->endpoint(
+            'team_repo',
+            team  => $args{team},
+            owner => $self->owner->{login},
+            repo  => $self->name,
+        ),
+        data => {
+            permission => $args{permission},
+        },
     )
 }
 
@@ -576,6 +602,67 @@ sub http_get {
             $self->page_cache->set($uri->as_string => $resp);
         } else {
             $log->tracef("Not caching [%s] due to status %d", $resp->code);
+        }
+
+        return Future->done(
+            { },
+            $resp
+        ) if $resp->code == 204;
+        return Future->done(
+            { },
+            $resp
+        ) if 3 == ($resp->code / 100);
+        try {
+            return Future->done(
+                $json->decode(
+                    $resp->decoded_content
+                ),
+                $resp
+            );
+        } catch {
+            $log->errorf("JSON decoding error %s from HTTP response %s", $@, $resp->as_string("\n"));
+            return Future->fail($@ => json => $resp);
+        }
+    })->else(sub {
+        my ($err, $src, $resp, $req) = @_;
+        $log->warnf("Github failed with error %s on source %s", $err, $src);
+        $src //= '';
+        if($src eq 'http') {
+            $log->errorf("HTTP error %s, request was %s with response %s", $err, $req->as_string("\n"), $resp->as_string("\n"));
+        } else {
+            $log->errorf("Other failure (%s): %s", $src // 'unknown', $err);
+        }
+        Future->fail(@_);
+    })
+}
+
+sub http_put {
+    my ($self, %args) = @_;
+    my %auth = $self->auth_info;
+
+    if(my $hdr = delete $auth{headers}) {
+        $args{headers}{$_} //= $hdr->{$_} for keys %$hdr
+    }
+    $args{$_} //= $auth{$_} for keys %auth;
+
+    my $uri = delete $args{uri};
+    my $data = delete $args{data};
+    $log->tracef("PUT %s { %s } <= %s", $uri->as_string, \%args, $data);
+    $data = $json->encode($data) if ref $data;
+    $self->http->PUT(
+        $uri,
+        $data,
+        content_type => 'application/json',
+        %args,
+    )->then(sub {
+        my ($resp) = @_;
+        $log->tracef("Github response: %s", $resp->as_string("\n"));
+        # If we had ratelimiting headers, apply them
+        for my $k (qw(Limit Remaining Reset)) {
+            if(defined(my $v = $resp->header('X-RateLimit-' . $k))) {
+                my $method = lc $k;
+                $self->core_rate_limit->$method->set_numeric($v);
+            }
         }
 
         return Future->done(
