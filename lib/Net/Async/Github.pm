@@ -32,6 +32,7 @@ no indirect;
 
 use Future;
 use Dir::Self;
+use Path::Tiny;
 use URI;
 use URI::QueryParam;
 use URI::Template;
