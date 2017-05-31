@@ -3,7 +3,7 @@ package Net::Async::Github;
 use strict;
 use warnings;
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 use parent qw(IO::Async::Notifier);
 
@@ -21,6 +21,10 @@ Net::Async::Github - support for L<https://github.com>'s REST API with L<IO::Asy
    token => '...',
   )
  );
+ # Give 'secret_team' pull access to all private repos
+ $gh->repos(visibility => 'private')
+    ->grant_team(secret_team => 'pull')
+    ->await;
 
 =head1 DESCRIPTION
 
