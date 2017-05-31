@@ -13,6 +13,7 @@ requires 'Path::Tiny', '>= 0.098';
 requires 'Syntax::Keyword::Try', '>= 0.04';
 requires 'Time::Moment', '>= 0.41';
 requires 'Cache::LRU', '>= 0.04';
+requires 'Data::GraphQL', '>= 0.001';
 requires 'IO::Async::Notifier', '>= 0.71';
 
 requires 'Net::Async::HTTP', '>= 0.41';
