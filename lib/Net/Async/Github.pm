@@ -37,6 +37,7 @@ no indirect;
 use Future;
 use Dir::Self;
 use Path::Tiny;
+use File::ShareDir;
 use URI;
 use URI::QueryParam;
 use URI::Template;
@@ -195,13 +196,15 @@ sub pr {
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, 'pulls', $args{id}
     );
-    $self->request(
-        GET => $uri,
-        user => $self->api_key,
-        pass => '',
-        headers => {
-            'Accept' => 'application/vnd.github.v3.full+json',
-        },
+    $self->http_get(
+        uri => $uri,
+    )->transform(
+        done => sub {
+            Net::Async::Github::PullRequest->new(
+                %{$_[0]},
+                github => $self,
+            )
+        }
     )
 }
 
