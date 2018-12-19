@@ -135,6 +135,30 @@
 		"method_list": [
 			{ "name" : "name" }
 		]
+	}, {
+		"package": "PullRequest",
+		"method_list": [
+			{ "name" : "url" },
+			{ "name" : "id" },
+			{ "name" : "node_id" },
+			{ "name" : "number" },
+			{ "name" : "state" },
+			{ "name" : "locked" },
+			{ "name" : "title" },
+			{ "name" : "user", "as": "Net::Async::Github::User" },
+			{ "name" : "body" },
+			{ "name" : "labels" },
+			{ "name" : "milestone" },
+			{ "name" : "created_at" },
+			{ "name" : "updated_at" },
+			{ "name" : "closed_at" },
+			{ "name" : "merged_at" },
+			{ "name" : "merge_commit_sha" },
+			{ "name" : "assignee", "as": "Net::Async::Github::User" },
+			{ "name" : "head" },
+			{ "name" : "base" },
+			{ "name" : "author_association" }
+		]
 	} ]
 }
 
