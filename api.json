@@ -154,6 +154,8 @@
 			{ "name" : "closed_at" },
 			{ "name" : "merged_at" },
 			{ "name" : "merge_commit_sha" },
+			{ "name" : "mergeable" },
+			{ "name" : "merged" },
 			{ "name" : "assignee", "as": "Net::Async::Github::User" },
 			{ "name" : "head" },
 			{ "name" : "base" },
