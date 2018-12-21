@@ -1093,13 +1093,20 @@ sub _add_to_loop {
         $self->{ryu} = Ryu::Async->new
     );
 
-    # Dynamic updates
-    $self->add_child(
-        $self->{ws} = Net::Async::WebSocket::Client->new(
-            on_raw_frame => $self->curry::weak::on_raw_frame,
-            on_frame     => sub { },
-        )
-    );
+}
+
+sub ws {
+    my ($self) = @_;
+    $self->{ws} // do {
+        require Net::Async::WebSocket::Client;
+        $self->add_child(
+            my $ws = Net::Async::WebSocket::Client->new(
+                on_frame => $self->curry::weak::on_frame,
+            )
+        );
+        Scalar::Util::weaken($self->{ws} = $ws);
+        $ws
+    };
 }
 
 1;
