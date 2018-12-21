@@ -186,6 +186,26 @@ sub merge_commit_sha {
     shift->{merge_commit_sha}
 }
 
+=head2 mergeable
+
+Provides an accessor for C<mergeable>.
+
+=cut
+
+sub mergeable {
+    shift->{mergeable}
+}
+
+=head2 merged
+
+Provides an accessor for C<merged>.
+
+=cut
+
+sub merged {
+    shift->{merged}
+}
+
 =head2 assignee
 
 Provides an accessor for C<assignee>.

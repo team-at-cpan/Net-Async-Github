@@ -57,6 +57,7 @@ use Net::Async::Github::Branch;
 use Net::Async::Github::User;
 use Net::Async::Github::Team;
 use Net::Async::Github::Plan;
+use Net::Async::Github::PullRequest;
 use Net::Async::Github::Repository;
 use Net::Async::Github::RateLimit;
 
@@ -241,6 +242,59 @@ sub Net::Async::Github::Repository::grant_team {
         data => {
             permission => $args{permission},
         },
+    )
+}
+
+sub Net::Async::Github::PullRequest::owner { shift->{base}{repo}{owner}{login} }
+sub Net::Async::Github::PullRequest::repo { shift->{base}{repo}{name} }
+sub Net::Async::Github::PullRequest::branch_name { shift->{head}{ref} }
+
+sub Net::Async::Github::PullRequest::merge {
+    my ($self, %args) = @_;
+    my $gh = $self->github;
+	$gh->validate_args(%args);
+    die 'invalid owner' if ref $self->owner;
+    die 'invalid repo' if ref $self->repo;
+    die 'invalid id' if ref $self->id;
+    my $uri = $gh->endpoint(
+        'pull_request_merge',
+        owner => $args{owner} // $self->owner,
+        repo  => $args{repo} // $self->repo,
+        id    => $args{id} // $self->number,
+    );
+    $log->infof('URI for PR merge is %s', "$uri");
+    $gh->http_put(
+        uri => $uri,
+        data => {
+            sha => $self->{head}{sha},
+            map { $_ => $args{$_} } grep { exists $args{$_} } qw(
+                commit_title
+                commit_message
+                sha
+                merge_method
+                admin_override
+            )
+        }
+    )
+}
+
+sub Net::Async::Github::PullRequest::cleanup {
+    my ($self, %args) = @_;
+    my $gh = $self->github;
+	$gh->validate_args(%args);
+    die 'invalid owner' if ref $self->owner;
+    die 'invalid repo' if ref $self->repo;
+    die 'invalid id' if ref $self->id;
+    my $uri = $gh->endpoint(
+        'git_refs',
+        category => 'heads',
+        owner    => $args{owner} // $self->{head}{repo}{owner}{login},
+        repo     => $args{repo} // $self->{head}{repo}{name},
+        ref      => $args{ref} // $self->branch_name,
+    );
+    $log->infof('URI for PR delete is %s', "$uri");
+    $gh->http_delete(
+        uri => $uri,
     )
 }
 
@@ -647,6 +701,66 @@ sub http_get {
     })
 }
 
+sub http_delete {
+    my ($self, %args) = @_;
+    my %auth = $self->auth_info;
+
+    if(my $hdr = delete $auth{headers}) {
+        $args{headers}{$_} //= $hdr->{$_} for keys %$hdr
+    }
+    $args{$_} //= $auth{$_} for keys %auth;
+
+    my $uri = delete $args{uri};
+    $log->tracef("DELETE %s { %s }", $uri->as_string, \%args);
+
+    # we never cache deletes
+    $self->http->do_request(
+        method => 'DELETE',
+        uri => $uri,
+        %args,
+    )->then(sub {
+        my ($resp) = @_;
+        $log->tracef("Github response: %s", $resp->as_string("\n"));
+        # If we had ratelimiting headers, apply them
+        for my $k (qw(Reset Limit Remaining)) {
+            if(defined(my $v = $resp->header('X-RateLimit-' . $k))) {
+                my $method = lc $k;
+                $self->core_rate_limit->$method->set_numeric($v);
+            }
+        }
+
+        return Future->done(
+            { },
+            $resp
+        ) if $resp->code == 204;
+        return Future->done(
+            { },
+            $resp
+        ) if 3 == ($resp->code / 100);
+        try {
+            return Future->done(
+                $json->decode(
+                    $resp->decoded_content
+                ),
+                $resp
+            );
+        } catch {
+            $log->errorf("JSON decoding error %s from HTTP response %s", $@, $resp->as_string("\n"));
+            return Future->fail($@ => json => $resp);
+        }
+    })->else(sub {
+        my ($err, $src, $resp, $req) = @_;
+        $log->warnf("Github failed with error %s on source %s", $err, $src);
+        $src //= '';
+        if($src eq 'http') {
+            $log->errorf("HTTP error %s, request was %s with response %s", $err, $req->as_string("\n"), $resp->as_string("\n"));
+        } else {
+            $log->errorf("Other failure (%s): %s", $src // 'unknown', $err);
+        }
+        Future->fail(@_);
+    })
+}
+
 sub http_put {
     my ($self, %args) = @_;
     my %auth = $self->auth_info;
@@ -661,6 +775,67 @@ sub http_put {
     $log->tracef("PUT %s { %s } <= %s", $uri->as_string, \%args, $data);
     $data = $json->encode($data) if ref $data;
     $self->http->PUT(
+        $uri,
+        $data,
+        content_type => 'application/json',
+        %args,
+    )->then(sub {
+        my ($resp) = @_;
+        $log->tracef("Github response: %s", $resp->as_string("\n"));
+        # If we had ratelimiting headers, apply them
+        for my $k (qw(Limit Remaining Reset)) {
+            if(defined(my $v = $resp->header('X-RateLimit-' . $k))) {
+                my $method = lc $k;
+                $self->core_rate_limit->$method->set_numeric($v);
+            }
+        }
+
+        return Future->done(
+            { },
+            $resp
+        ) if $resp->code == 204;
+        return Future->done(
+            { },
+            $resp
+        ) if 3 == ($resp->code / 100);
+        try {
+            return Future->done(
+                $json->decode(
+                    $resp->decoded_content
+                ),
+                $resp
+            );
+        } catch {
+            $log->errorf("JSON decoding error %s from HTTP response %s", $@, $resp->as_string("\n"));
+            return Future->fail($@ => json => $resp);
+        }
+    })->else(sub {
+        my ($err, $src, $resp, $req) = @_;
+        $log->warnf("Github failed with error %s on source %s", $err, $src);
+        $src //= '';
+        if($src eq 'http') {
+            $log->errorf("HTTP error %s, request was %s with response %s", $err, $req->as_string("\n"), $resp->as_string("\n"));
+        } else {
+            $log->errorf("Other failure (%s): %s", $src // 'unknown', $err);
+        }
+        Future->fail(@_);
+    })
+}
+
+sub http_post {
+    my ($self, %args) = @_;
+    my %auth = $self->auth_info;
+
+    if(my $hdr = delete $auth{headers}) {
+        $args{headers}{$_} //= $hdr->{$_} for keys %$hdr
+    }
+    $args{$_} //= $auth{$_} for keys %auth;
+
+    my $uri = delete $args{uri};
+    my $data = delete $args{data};
+    $log->tracef("POST %s { %s } <= %s", $uri->as_string, \%args, $data);
+    $data = $json->encode($data) if ref $data;
+    $self->http->POST(
         $uri,
         $data,
         content_type => 'application/json',
