@@ -213,7 +213,7 @@ sub pr {
 
 sub teams {
     my ($self, %args) = @_;
-	$self->validate_args(%args);
+    $self->validate_args(%args);
     $self->api_get_list(
         uri   => $self->endpoint('team', org => $args{organisation}),
         class => 'Net::Async::Github::Team',
@@ -223,7 +223,7 @@ sub teams {
 sub Net::Async::Github::Repository::branches {
     my ($self, %args) = @_;
     my $gh = $self->github;
-	$gh->validate_args(%args);
+    $gh->validate_args(%args);
     $gh->api_get_list(
         uri   => $self->branches_url->process,
         class => 'Net::Async::Github::Branch',
@@ -233,7 +233,7 @@ sub Net::Async::Github::Repository::branches {
 sub Net::Async::Github::Repository::grant_team {
     my ($self, %args) = @_;
     my $gh = $self->github;
-	$gh->validate_args(%args);
+    $gh->validate_args(%args);
     $self->github->http_put(
         uri => $self->github->endpoint(
             'team_repo',
@@ -266,7 +266,7 @@ sub Net::Async::Github::Repository::grant_team {
 sub Net::Async::Github::Repository::protect_branch {
     my ($self, %args) = @_;
     my $gh = $self->github;
-	$gh->validate_args(%args);
+    $gh->validate_args(%args);
 
     # Coërce the true/false values into something appropriate for JSON
     $args{required_status_checks} = { %{$args{required_status_checks}} };
@@ -303,7 +303,7 @@ sub Net::Async::Github::Repository::protect_branch {
 sub Net::Async::Github::Repository::branch_protection {
     my ($self, %args) = @_;
     my $gh = $self->github;
-	$gh->validate_args(%args);
+    $gh->validate_args(%args);
     $self->github->http_get(
         uri => $self->github->endpoint(
             'branch_protection',
@@ -317,7 +317,7 @@ sub Net::Async::Github::Repository::branch_protection {
 sub Net::Async::Github::Repository::get_file {
     my ($self, %args) = @_;
     my $gh = $self->github;
-	$gh->validate_args(%args);
+    $gh->validate_args(%args);
     $self->github->http_get(
         uri => $self->github->endpoint(
             'contents',
@@ -345,7 +345,7 @@ sub Net::Async::Github::PullRequest::branch_name { shift->{head}{ref} }
 sub Net::Async::Github::PullRequest::merge {
     my ($self, %args) = @_;
     my $gh = $self->github;
-	$gh->validate_args(%args);
+    $gh->validate_args(%args);
     die 'invalid owner' if ref $self->owner;
     die 'invalid repo' if ref $self->repo;
     die 'invalid id' if ref $self->id;
@@ -374,7 +374,7 @@ sub Net::Async::Github::PullRequest::merge {
 sub Net::Async::Github::PullRequest::cleanup {
     my ($self, %args) = @_;
     my $gh = $self->github;
-	$gh->validate_args(%args);
+    $gh->validate_args(%args);
     die 'invalid owner' if ref $self->owner;
     die 'invalid repo' if ref $self->repo;
     die 'invalid id' if ref $self->id;
@@ -393,7 +393,7 @@ sub Net::Async::Github::PullRequest::cleanup {
 
 sub repos {
     my ($self, %args) = @_;
-	if(my $user = delete $args{owner}) {
+    if(my $user = delete $args{owner}) {
         $self->validate_owner_name($user);
         $self->api_get_list(
             endpoint => 'user_repositories',
@@ -403,7 +403,7 @@ sub repos {
             },
             class => 'Net::Async::Github::Repository',
         )
-	} else {
+    } else {
         $self->api_get_list(
             endpoint => 'current_user_repositories',
             endpoint_args => {
@@ -416,8 +416,8 @@ sub repos {
 
 sub repo {
     my ($self, %args) = @_;
-	die 'need an owner name' unless my $owner = delete $args{owner};
-	die 'need a repo name' unless my $repo_name = delete $args{name};
+    die 'need an owner name' unless my $owner = delete $args{owner};
+    die 'need a repo name' unless my $repo_name = delete $args{name};
     $self->validate_owner_name($owner);
     $self->validate_repo_name($repo_name);
     $self->http_get(
@@ -614,7 +614,7 @@ templates, used by L</endpoint>.
 
 sub endpoints {
     my ($self) = @_;
-	$self->{endpoints} ||= do {
+    $self->{endpoints} ||= do {
         my $path = Path::Tiny::path(__DIR__)->parent(3)->child('share/endpoints.json');
         $path = Path::Tiny::path(
             File::ShareDir::dist_file(

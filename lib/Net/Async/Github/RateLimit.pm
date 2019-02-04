@@ -20,9 +20,9 @@ Instantiates.
 =cut
 
 sub new {
-	my ($class, %args) = @_;
-	$args{core} = Net::Async::Github::RateLimit::Core->new(%{ delete $args{resources}{core} });
-	bless \%args, $class
+    my ($class, %args) = @_;
+    $args{core} = Net::Async::Github::RateLimit::Core->new(%{ delete $args{resources}{core} });
+    bless \%args, $class
 }
 
 =head2 core

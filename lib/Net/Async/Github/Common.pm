@@ -18,9 +18,9 @@ Instantiates. This will expect the L</github> attribute to be passed.
 =cut
 
 sub new {
-	my $self = bless { @_[1..$#_] }, $_[0];
-	die "no ->github provided" unless $self->github;
-	$self
+    my $self = bless { @_[1..$#_] }, $_[0];
+    die "no ->github provided" unless $self->github;
+    $self
 }
 
 =head2 github
