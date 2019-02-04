@@ -13,7 +13,7 @@ install_share dist => "share";
 
 
 my %WriteMakefileArgs = (
-  "ABSTRACT" => "support for L<https://github.com>'s REST API with L<IO::Async>",
+  "ABSTRACT" => "support for the L<https://github.com> REST API with L<IO::Async>",
   "AUTHOR" => "Tom Molesworth <TEAM\@cpan.org>",
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => 0,
