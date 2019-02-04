@@ -9,7 +9,7 @@ use parent qw(IO::Async::Notifier);
 
 =head1 NAME
 
-Net::Async::Github - support for L<https://github.com>'s REST API with L<IO::Async>
+Net::Async::Github - support for the L<https://github.com> REST API with L<IO::Async>
 
 =head1 SYNOPSIS
 
