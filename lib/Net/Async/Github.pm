@@ -562,9 +562,9 @@ sub core_rate_limit {
             )->on_done(sub {
                 my $data = shift;
                 $log->tracef("Github rate limit response was %s", $data);
+                $rl->reset->set_numeric($data->{resources}{core}{reset});
                 $rl->limit->set_numeric($data->{resources}{core}{limit});
                 $rl->remaining->set_numeric($data->{resources}{core}{remaining});
-                $rl->reset->set_numeric($data->{resources}{core}{reset});
             })
         );
         $rl;
