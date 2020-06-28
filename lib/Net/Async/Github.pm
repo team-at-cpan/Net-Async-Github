@@ -562,9 +562,9 @@ sub core_rate_limit {
             )->on_done(sub {
                 my $data = shift;
                 $log->tracef("Github rate limit response was %s", $data);
+                $rl->reset->set_numeric($data->{resources}{core}{reset});
                 $rl->limit->set_numeric($data->{resources}{core}{limit});
                 $rl->remaining->set_numeric($data->{resources}{core}{remaining});
-                $rl->reset->set_numeric($data->{resources}{core}{reset});
             })
         );
         $rl;
@@ -777,7 +777,7 @@ sub http_get {
         my ($resp) = @_;
         $log->tracef("Github response: %s", $resp->as_string("\n"));
         # If we had ratelimiting headers, apply them
-        for my $k (qw(Limit Remaining Reset)) {
+        for my $k (qw(Reset Limit Remaining)) {
             if(defined(my $v = $resp->header('X-RateLimit-' . $k))) {
                 my $method = lc $k;
                 $self->core_rate_limit->$method->set_numeric($v);
