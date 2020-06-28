@@ -52,6 +52,7 @@ my %WriteMakefileArgs = (
     "namespace::clean" => 0,
     "parent" => 0,
     "strict" => 0,
+    "utf8" => 0,
     "warnings" => 0
   },
   "TEST_REQUIRES" => {
@@ -104,6 +105,7 @@ my %FallbackPrereqs = (
   "namespace::clean" => 0,
   "parent" => 0,
   "strict" => 0,
+  "utf8" => 0,
   "warnings" => 0
 );
 
