@@ -1,10 +1,12 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
-    Bug fixed:
-    Set `reset` limit as soon as possible: When we subscribe remaining changes and print seconds_left,
-    the script will print a warning of 'Use of uninitialized value in addition (+)
-    at /home/git/regentmarkets/cpan/local/lib/perl5/Ryu/Observable.pm line 62.'
+    No new features.
+
+    Bugs fixed:
+
+    - set `reset` limit as soon as possible, to avoid 'Use of uninitialized value in addition` warnings,
+    thanks to @chylli-binary (Github #1)
 
 0.005     2019-02-04 13:08:29+08:00 Asia/Kuala_Lumpur
     New features:

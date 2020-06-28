@@ -4,8 +4,14 @@ use strict;
 use warnings;
 
 our $VERSION = '0.005';
+# AUTHORITY
 
 use parent qw(IO::Async::Notifier);
+
+no indirect;
+use utf8;
+
+=encoding utf8
 
 =head1 NAME
 
@@ -1233,9 +1239,9 @@ sub ws {
 
 =head1 AUTHOR
 
-Tom Molesworth <TEAM@cpan.org>
+Tom Molesworth <TEAM@cpan.org>, with contributions from C<< @chylli-binary >>.
 
 =head1 LICENSE
 
-Copyright Tom Molesworth 2014-2019. Licensed under the same terms as Perl itself.
+Copyright Tom Molesworth 2014-2020. Licensed under the same terms as Perl itself.
 
