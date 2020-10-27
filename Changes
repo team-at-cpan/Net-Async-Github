@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.007     2020-10-28 07:34:00+08:00 Asia/Kuala_Lumpur
     New features:
 
     - ->create_pr for creating a new pull request
