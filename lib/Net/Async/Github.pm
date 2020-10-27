@@ -161,16 +161,10 @@ sub reopen {
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, 'pulls', $args{id}
     );
-    $self->request(
-        PATCH => $uri,
-        $json->encode({
+    $self->http_patch(
+        uri => $uri,
+        data => {
             state => 'open',
-        }),
-        content_type => 'application/json',
-        user => $self->api_key,
-        pass => '',
-        headers => {
-            'Accept' => 'application/vnd.github.v3.full+json',
         },
     )
 }
@@ -287,9 +281,8 @@ sub create_pr {
             head => $args{head},
             base => $args{base},
         },
-    );
+    )
 }
-
 
 # Example:
 #
@@ -548,13 +541,8 @@ sub head {
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, qw(git refs heads), $args{branch}
     );
-    $self->request(
-        GET => $uri,
-        user => $self->api_key,
-        pass => '',
-        headers => {
-            'Accept' => 'application/vnd.github.v3.full+json',
-        },
+    $self->http_get(
+        uri => $uri
     )
 }
 
@@ -570,16 +558,12 @@ sub update {
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, qw(merges)
     );
-    $self->request(
-        POST => $uri,
-        $json->encode({
+    $self->http_post(
+        uri => $uri,
+        data => {
             head           => $args{head},
             base           => $args{branch},
             commit_message => "Merge branch 'master' into " . $args{branch},
-        }),
-        content_type => 'application/json',
-        headers => {
-            'Accept' => 'application/vnd.github.v3.full+json',
         },
     )
 }
@@ -933,6 +917,7 @@ sub http_delete {
 sub http_put {
     my ($self, %args) = @_;
     my %auth = $self->auth_info;
+    my $method = delete $args{method} || 'PUT';
 
     if(my $hdr = delete $auth{headers}) {
         $args{headers}{$_} //= $hdr->{$_} for keys %$hdr
@@ -941,9 +926,9 @@ sub http_put {
 
     my $uri = delete $args{uri};
     my $data = delete $args{data};
-    $log->tracef("PUT %s { %s } <= %s", $uri->as_string, \%args, $data);
+    $log->tracef("%s %s { %s } <= %s", $method, $uri->as_string, \%args, $data);
     $data = $json->encode($data) if ref $data;
-    $self->http->PUT(
+    $self->http->$method(
         $uri,
         $data,
         content_type => 'application/json',
@@ -989,6 +974,11 @@ sub http_put {
         }
         Future->fail(@_);
     })
+}
+
+sub http_patch {
+    my ($self, %args) = @_;
+    return $self->http_put(%args, method => 'PATCH');
 }
 
 sub http_post {
