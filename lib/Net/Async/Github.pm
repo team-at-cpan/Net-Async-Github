@@ -319,7 +319,7 @@ sub update_ref {
         ),
         data => {
             sha => $args{sha},
-            force => ($args{force} ? $json->true : $json->false)
+            force => ($args{force} ? JSON->true : JSON->false)
         },
     )
 }
@@ -364,7 +364,8 @@ sub create_pr {
 
 =head2 create_commit
 
-Creates a new pull request.
+Creates an empty commit. Can be used to simulate C<git commit --allow-empty>
+or to create a merge commit from multiple heads.
 
 Takes the following named parameters:
 
@@ -1045,9 +1046,10 @@ sub http_put {
     my $data = delete $args{data};
     $log->tracef("%s %s { %s } <= %s", $method, $uri->as_string, \%args, $data);
     $data = $json->encode($data) if ref $data;
-    $self->http->$method(
-        $uri,
-        $data,
+    $self->http->do_request(
+        method       => $method,
+        uri          => $uri,
+        content      => $data,
         content_type => 'application/json',
         %args,
     )->then(sub {
@@ -1091,12 +1093,6 @@ sub http_put {
         }
         Future->fail(@_);
     })
-}
-
-sub Net::Async::HTTP::PATCH {
-    my $self = shift;
-    my ( $uri, $content, @args ) = @_;
-    return $self->do_request( method => "PATCH", uri => $uri, content => $content, @args );
 }
 
 sub http_patch {
