@@ -206,19 +206,15 @@ sub pr {
 sub prs {
     my ($self, %args) = @_;
     die "needs $_" for grep !$args{$_}, qw(owner repo);
-    my $uri = $self->base_uri;
-    $uri->path(join '/', 'repos',$args{owner}, $args{repo}, 'pulls');
-    $log->tracef('Check Github pull request via URI %s', "$uri");
-    $self->http_get(
-        uri => $uri,
-                   )
-      ->transform(
-        done => sub {
-            my $prs = shift;
-            $log->tracef('Github PRs data was %s', $prs);
-            [map { Net::Async::Github::PullRequest->new(%{$_}, github => $self)} $prs->@*];
-        }
-    )
+    $self->validate_args(%args);
+    $self->api_get_list(
+                        endpoint => 'pull_request',
+                        endpoint_args => {
+                                          owner => $args{owner},
+                                          repo => $args{repo},
+                                         },
+                        class => 'Net::Async::Github::PullRequest'
+                       );
 
 }
 
