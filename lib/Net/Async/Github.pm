@@ -200,15 +200,26 @@ sub pr {
     $log->tracef('Check Github pull request via URI %s', "$uri");
     $self->http_get(
         uri => $uri,
-    )->transform(
+    )
+}
+
+sub prs {
+    my ($self, %args) = @_;
+    die "needs $_" for grep !$args{$_}, qw(owner repo);
+    my $uri = $self->base_uri;
+    $uri->path(join '/', 'repos',$args{owner}, $args{repo}, 'pulls');
+    $log->tracef('Check Github pull request via URI %s', "$uri");
+    $self->http_get(
+        uri => $uri,
+                   )
+      ->transform(
         done => sub {
-            $log->tracef('Github PR data was ', $_[0]);
-            Net::Async::Github::PullRequest->new(
-                %{$_[0]},
-                github => $self,
-            )
+            my $prs = shift;
+            $log->tracef('Github PRs data was %s', $prs);
+            [map { Net::Async::Github::PullRequest->new(%{$_}, github => $self)} $prs->@*];
         }
     )
+
 }
 
 sub teams {
@@ -584,7 +595,7 @@ sub repo {
         ),
     )->transform(
         done => sub {
-            $log->tracef('Github repo data was ', $_[0]);
+            $log->tracef('Github repo data was %s', $_[0]);
             Net::Async::Github::Repository->new(
                 %{$_[0]},
                 github => $self,
