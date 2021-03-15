@@ -200,6 +200,14 @@ sub pr {
     $log->tracef('Check Github pull request via URI %s', "$uri");
     $self->http_get(
         uri => $uri,
+    )->transform(
+        done => sub {
+            $log->tracef('Github PR data was ', $_[0]);
+            Net::Async::Github::PullRequest->new(
+                %{$_[0]},
+                github => $self,
+            )
+        }
     )
 }
 
