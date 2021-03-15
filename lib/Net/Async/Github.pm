@@ -211,19 +211,37 @@ sub pr {
     )
 }
 
+=head2 prs
+
+Returns information of all PRs of given repository.
+
+Expects the following named parameters:
+
+=over 4
+
+=item * owner - which user or organisation owns this PR
+
+=item * repo - which repo it's for
+
+=back
+
+Return Ryu::Source object that resolves to the object of all PRs.
+
+=cut
+
+
 sub prs {
     my ($self, %args) = @_;
     die "needs $_" for grep !$args{$_}, qw(owner repo);
     $self->validate_args(%args);
     $self->api_get_list(
-                        endpoint => 'pull_request',
-                        endpoint_args => {
-                                          owner => $args{owner},
-                                          repo => $args{repo},
-                                         },
-                        class => 'Net::Async::Github::PullRequest'
-                       );
-
+        endpoint => 'pull_request',
+        endpoint_args => {
+            owner => $args{owner},
+            repo => $args{repo},
+        },
+        class => 'Net::Async::Github::PullRequest'
+    );
 }
 
 sub teams {
