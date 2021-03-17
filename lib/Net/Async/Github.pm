@@ -1344,7 +1344,7 @@ Will raise an exception on invalid input.
 sub validate_repo_name {
     my ($self, $repo) = @_;
     die "repo name not defined" unless defined $repo;
-    die "repo name contains invalid characters" if $repo =~ /[^a-z0-9-]/i;
+    die "repo name contains invalid characters" if $repo =~ /[^a-z0-9-_]/i;
     die "repo name too long" if length($repo) > 100;
     return 1;
 }
