@@ -114,6 +114,8 @@ Accepts the following optional named parameters:
 
 =item * C<page_cache_size> - number of GET responses to cache. Defaults to 1000, set to 0 to disable.
 
+=item * C<timeout> - How long in seconds to wait before giving up on a request. Defaults to 60. If set to 0, then no timeout will take place.
+
 =back
 
 B< You probably just want C<token> >, defaults should be fine for the
@@ -127,7 +129,7 @@ instance to the constructor for a new instance.
 
 sub configure {
     my ($self, %args) = @_;
-    for my $k (grep exists $args{$_}, qw(token endpoints api_key http base_uri mime_type page_cache_size)) {
+    for my $k (grep exists $args{$_}, qw(token endpoints api_key http base_uri mime_type page_cache_size timeout)) {
         $self->{$k} = delete $args{$k};
     }
     $self->SUPER::configure(%args);
@@ -209,6 +211,39 @@ sub pr {
             )
         }
     )
+}
+
+=head2 prs
+
+Returns information of all PRs of given repository.
+
+Expects the following named parameters:
+
+=over 4
+
+=item * owner - which user or organisation owns this PR
+
+=item * repo - which repo it's for
+
+=back
+
+Return Ryu::Source object that resolves to the object of all PRs.
+
+=cut
+
+
+sub prs {
+    my ($self, %args) = @_;
+    die "needs $_" for grep !$args{$_}, qw(owner repo);
+    $self->validate_args(%args);
+    $self->api_get_list(
+        endpoint => 'pull_request',
+        endpoint_args => {
+            owner => $args{owner},
+            repo => $args{repo},
+        },
+        class => 'Net::Async::Github::PullRequest'
+    );
 }
 
 sub teams {
@@ -584,7 +619,7 @@ sub repo {
         ),
     )->transform(
         done => sub {
-            $log->tracef('Github repo data was ', $_[0]);
+            $log->tracef('Github repo data was %s', $_[0]);
             Net::Async::Github::Repository->new(
                 %{$_[0]},
                 github => $self,
@@ -808,8 +843,8 @@ sub http {
                 pipeline                 => 1,
                 max_in_flight            => 4,
                 decode_content           => 1,
-                timeout                  => $self->timeout,
                 user_agent               => 'Mozilla/4.0 (perl; Net::Async::Github; TEAM@cpan.org)',
+                $self->timeout ? (timeout => $self->timeout) : (),
             )
         );
         $ua
@@ -839,7 +874,17 @@ sub connections_per_host { 4 }
 # Like connections, but for data modification - POST, PUT, PATCH etc.
 sub updates_per_host { 1 }
 
-sub timeout { 60 }
+=head2 timeout
+
+The parameter that will be used when create Net::Async::HTTP object. If it is undef, then a default value
+60 seconds will be used. If it is 0, then Net::Async::HTTP will never timeout.
+
+=cut
+
+sub timeout {
+    my ($self) = @_;
+    return $self->{timeout} // 60;
+}
 
 =head2 auth_info
 
@@ -1311,7 +1356,7 @@ Will raise an exception on invalid input.
 sub validate_repo_name {
     my ($self, $repo) = @_;
     die "repo name not defined" unless defined $repo;
-    die "repo name contains invalid characters" if $repo =~ /[^a-z0-9-]/i;
+    die "repo name contains invalid characters" if $repo =~ /[^a-z0-9-_]/i;
     die "repo name too long" if length($repo) > 100;
     return 1;
 }
