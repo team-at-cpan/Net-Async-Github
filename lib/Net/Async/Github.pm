@@ -171,7 +171,7 @@ sub reopen {
     )
 }
 
-=head2 pr
+=head2 pull_request
 
 Returns information about the given PR.
 
@@ -191,7 +191,7 @@ Resolves to the current status.
 
 =cut
 
-sub pr {
+sub pull_request {
     my ($self, %args) = @_;
     die "needs $_" for grep !$args{$_}, qw(owner repo id);
     $self->validate_args(%args);
@@ -213,7 +213,10 @@ sub pr {
     )
 }
 
-=head2 prs
+# Provide an alias for anyone relying on previous name
+*pr = *pull_request;
+
+=head2 pull_requests
 
 Returns information of all PRs of given repository.
 
@@ -221,20 +224,19 @@ Expects the following named parameters:
 
 =over 4
 
-=item * owner - which user or organisation owns this PR
+=item * C<owner> - which user or organisation owns this PR
 
-=item * repo - which repo it's for
+=item * C<repo> - the repository this pull request is for
 
 =back
 
-Return Ryu::Source object that resolves to the object of all PRs.
+Returns a L<Ryu::Source> instance, this will emit a L<Net::Async::Github::PullRequest>
+instance for each found repository.
 
 =cut
 
-
-sub prs {
+sub pull_requests {
     my ($self, %args) = @_;
-    die "needs $_" for grep !$args{$_}, qw(owner repo);
     $self->validate_args(%args);
     $self->api_get_list(
         endpoint => 'pull_request',
@@ -245,6 +247,9 @@ sub prs {
         class => 'Net::Async::Github::PullRequest'
     );
 }
+
+# Provide an alias for anyone relying on previous name
+*prs = *pull_requests;
 
 sub teams {
     my ($self, %args) = @_;
@@ -844,7 +849,11 @@ sub http {
                 max_in_flight            => 4,
                 decode_content           => 1,
                 user_agent               => 'Mozilla/4.0 (perl; Net::Async::Github; TEAM@cpan.org)',
-                $self->timeout ? (timeout => $self->timeout) : (),
+                (
+                    $self->timeout
+                    ? (timeout => $self->timeout)
+                    : ()
+                ),
             )
         );
         $ua
@@ -881,10 +890,7 @@ The parameter that will be used when create Net::Async::HTTP object. If it is un
 
 =cut
 
-sub timeout {
-    my ($self) = @_;
-    return $self->{timeout} // 60;
-}
+sub timeout { shift->{timeout} //= 60 }
 
 =head2 auth_info
 
@@ -1356,7 +1362,13 @@ Will raise an exception on invalid input.
 sub validate_repo_name {
     my ($self, $repo) = @_;
     die "repo name not defined" unless defined $repo;
-    die "repo name contains invalid characters" if $repo =~ /[^a-z0-9-_]/i;
+    # Not really as well-defined as I'd like, closest to an official answer seems to be here:
+    # https://github.community/t/github-repository-name-vs-description-vs-readme-heading-h1/3284
+    # There are repositories with underscores, but that seems to be strongly discouraged:
+    # https://github.com/Automattic/_s
+    # Canonical repositories with '. character would include the `.wiki` "magic" repo for each
+    # Github repo
+    die "repo name contains invalid characters" if $repo =~ /[^a-z0-9.]/i;
     die "repo name too long" if length($repo) > 100;
     return 1;
 }
