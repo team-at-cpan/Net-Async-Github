@@ -874,6 +874,13 @@ sub connections_per_host { 4 }
 # Like connections, but for data modification - POST, PUT, PATCH etc.
 sub updates_per_host { 1 }
 
+=head2 timeout
+
+The parameter that will be used when create Net::Async::HTTP object. If it is undef, then a default value
+60 seconds will be used. If it is 0, then Net::Async::HTTP will never timeout.
+
+=cut
+
 sub timeout {
     my ($self) = @_;
     return $self->{timeout} // 60;
