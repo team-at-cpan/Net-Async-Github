@@ -132,7 +132,7 @@
 		]
 	}, {
 		"package": "Branch",
-		"method_list": [
+   		"method_list": [
 			{ "name" : "name" }
 		]
 	}, {
@@ -161,7 +161,17 @@
 			{ "name" : "base" },
 			{ "name" : "author_association" }
 		]
-	} ]
+	},{
+		"package" : "Commit",
+		"method_list": [
+			{ "name" : "url" },
+			{ "name" : "sha" },
+			{ "name" : "node_id"},
+			{ "name" : "html_url", "as":"URI::Template" },
+			{ "name" : "comments_url", "as":"URI::Template"},
+			{ "name" : "commit" }
+		]
+	}]
 }
 
 
