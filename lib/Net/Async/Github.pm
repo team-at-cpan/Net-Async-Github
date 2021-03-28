@@ -251,6 +251,24 @@ sub pull_requests {
 # Provide an alias for anyone relying on previous name
 *prs = *pull_requests;
 
+sub compare {
+    my ($self, %args) = @_;
+    #owner repo base head
+    $self->validate_args(%args);
+    ($args{$_} || die "$_ branch name required") for qw(base head);
+    for my $arg_name (qw(base head)){
+        if($args{$arg_name} =~ /^(.*):(.*)$/){
+            my ($user, $branch) = ($1, $2);
+            $self->validate_owner_name($user);
+            $self->validate_branch_name($branch);
+        }
+        else{
+            $self->validate_branch_name($args{$arg_name});
+        }
+    }
+    return Future->done;
+}
+
 sub teams {
     my ($self, %args) = @_;
     $self->validate_args(%args);
