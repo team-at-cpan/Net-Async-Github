@@ -197,6 +197,7 @@ sub pull_request {
     die "needs $_" for grep !$args{$_}, qw(owner repo id);
     $self->validate_args(%args);
     my $uri = $self->base_uri;
+    # TODO use endpoint
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, 'pulls', $args{id}
     );
@@ -240,7 +241,7 @@ sub pull_requests {
     my ($self, %args) = @_;
     $self->validate_args(%args);
     $self->api_get_list(
-        endpoint => 'pull_request',
+        endpoint => 'pull_requests',
         endpoint_args => {
             owner => $args{owner},
             repo => $args{repo},
@@ -427,7 +428,7 @@ sub create_pr {
     $self->validate_args(%args);
     $self->http_post(
         uri => $self->endpoint(
-            'pull_request',
+            'pull_requests',
             owner => $args{owner},
             repo  => $args{repo},
         ),
