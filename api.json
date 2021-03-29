@@ -169,7 +169,8 @@
 			{ "name" : "node_id"},
 			{ "name" : "html_url", "as":"URI::Template" },
 			{ "name" : "comments_url", "as":"URI::Template"},
-			{ "name" : "commit" }
+			{ "name" : "commit" },
+			{ "name" : "parents"}
 		]
 	}]
 }

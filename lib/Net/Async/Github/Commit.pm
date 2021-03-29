@@ -89,5 +89,15 @@ sub commit {
     shift->{commit}
 }
 
+=head2 parents
+
+Provides an accessor for C<parents>.
+
+=cut
+
+sub parents {
+    shift->{parents}
+}
+
 1;
 
