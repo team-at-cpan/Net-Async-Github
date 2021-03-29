@@ -605,6 +605,23 @@ sub Net::Async::Github::PullRequest::merge {
     )
 }
 
+sub Net::Async::Github::PullRequest::update {
+    my ($self, %args) = @_;
+    my $gh = $self->github;
+    $gh->validate_args(%args);
+    my $uri = $self->url;
+    $log->infof('URI for PR update is %s', "$uri");
+    $gh->http_patch(
+        uri => $uri,
+        data => \%args
+    )
+}
+
+sub Net::Async::Github::PullRequest::close {
+    my ($self, %args) = @_;
+    $self->update(state => 'close');
+}
+
 sub Net::Async::Github::PullRequest::cleanup {
     my ($self, %args) = @_;
     my $gh = $self->github;

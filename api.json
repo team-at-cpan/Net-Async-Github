@@ -138,7 +138,7 @@
 	}, {
 		"package": "PullRequest",
 		"method_list": [
-			{ "name" : "url" },
+			{ "name" : "url", "as" : "URI" },
 			{ "name" : "id" },
 			{ "name" : "node_id" },
 			{ "name" : "number" },
