@@ -204,7 +204,7 @@ sub pull_request {
         uri => $uri,
     )->transform(
         done => sub {
-            $log->tracef('Github PR data was ', $_[0]);
+            $log->tracef('Github PR data was %s', $_[0]);
             Net::Async::Github::PullRequest->new(
                 %{$_[0]},
                 github => $self,
@@ -266,7 +266,26 @@ sub compare {
             $self->validate_branch_name($args{$arg_name});
         }
     }
-    return Future->done;
+    $self->http_get(
+        uri => $self->endpoint('compare',
+        owner => $args{owner},
+        repo => $args{repo},
+        base => $args{base},
+        head => $args{head})
+    )->transform(
+        done => sub {
+            my ($result) = @_;
+            $log->infof('Github compare data was %s', $result);# TODO change tracef
+            my @commits;
+            foreach my $commit ($result->{commits}->@*){
+                push @commits, Net::Async::Github::Commit->new(
+                    $commit->%*,
+                    github => $self
+                );
+            }
+            return @commits;
+        }
+    );
 }
 
 sub teams {
@@ -972,7 +991,7 @@ sub http_get {
     $args{$_} //= $auth{$_} for keys %auth;
 
     my $uri = delete $args{uri};
-    $log->tracef("GET %s { %s }", $uri->as_string, \%args);
+    $log->infof("GET %s { %s }", $uri->as_string, \%args);
     my $cached = $self->page_cache->get($uri->as_string);
     if($cached) {
         $log->tracef("Had cached page data, etag %s and last modified %s", $cached->header('ETag'), $cached->header('Last-Modified'));
