@@ -276,7 +276,7 @@ sub compare {
     )->transform(
         done => sub {
             my ($result) = @_;
-            $log->infof('Github compare data was %s', $result);# TODO change tracef
+            $log->tracef('Github compare data was %s', $result);# TODO change tracef
             my @commits;
             foreach my $commit ($result->{commits}->@*){
                 push @commits, Net::Async::Github::Commit->new(
@@ -992,7 +992,7 @@ sub http_get {
     $args{$_} //= $auth{$_} for keys %auth;
 
     my $uri = delete $args{uri};
-    $log->infof("GET %s { %s }", $uri->as_string, \%args);
+    $log->tracef("GET %s { %s }", $uri->as_string, \%args);
     my $cached = $self->page_cache->get($uri->as_string);
     if($cached) {
         $log->tracef("Had cached page data, etag %s and last modified %s", $cached->header('ETag'), $cached->header('Last-Modified'));
