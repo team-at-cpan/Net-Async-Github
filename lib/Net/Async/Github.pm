@@ -253,6 +253,29 @@ sub pull_requests {
 # Provide an alias for anyone relying on previous name
 *prs = *pull_requests;
 
+=head2 compare
+
+Compare the given base and head branch and return the lastest 250 coommits from the result.
+See L<https://docs.github.com/en/rest/reference/repos#compare-two-commits>
+
+Expects the following named parameters:
+
+=over 4
+
+=item * C<owner> - which user or organisation owns this branch
+
+=item * C<repo> - the repository this branch is in
+
+=item * C<base> - the base branch, which can be the format "user:branch" if it is in another repo in the same network
+
+=item * C<head> - the head branch, which can be the format "user:branch" if it is in another repo in the same network
+
+=back
+
+Returns a L<Future> instance resolved to a list of L<Net::Async::Github::PullRequest>
+
+=cut
+
 sub compare {
     my ($self, %args) = @_;
     #owner repo base head
@@ -605,6 +628,14 @@ sub Net::Async::Github::PullRequest::merge {
     )
 }
 
+=head2 Net::Async::github::PullRequest::update
+
+update the state of a Pull Request. Please refer L<https://docs.github.com/en/rest/reference/pulls#update-a-pull-request>
+
+=cut
+
+
+
 sub Net::Async::Github::PullRequest::update {
     my ($self, %args) = @_;
     my $gh = $self->github;
@@ -616,6 +647,12 @@ sub Net::Async::Github::PullRequest::update {
         data => \%args
     )
 }
+
+=head2 Net::Async::Github::PullRequest::close
+
+Close a Pull Request.
+
+=cut
 
 sub Net::Async::Github::PullRequest::close {
     my ($self, %args) = @_;
