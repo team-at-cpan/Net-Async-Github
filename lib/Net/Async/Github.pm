@@ -255,7 +255,7 @@ sub pull_requests {
 
 =head2 compare
 
-Compare the given base and head branch and return the lastest 250 coommits from the result.
+Compare the given base and head branch and return the latest 250 commits from the result.
 See L<https://docs.github.com/en/rest/reference/repos#compare-two-commits>
 
 Expects the following named parameters:
@@ -1541,4 +1541,3 @@ Tom Molesworth <TEAM@cpan.org>, with contributions from C<< @chylli-binary >>.
 =head1 LICENSE
 
 Copyright Tom Molesworth 2014-2021. Licensed under the same terms as Perl itself.
-
