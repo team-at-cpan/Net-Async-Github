@@ -278,7 +278,6 @@ Returns a L<Future> instance resolved to a list of L<Net::Async::Github::PullReq
 
 sub compare {
     my ($self, %args) = @_;
-    #owner repo base head
     $self->validate_args(%args);
     ($args{$_} || die "$_ branch name required") for qw(base head);
     for my $arg_name (qw(base head)){
