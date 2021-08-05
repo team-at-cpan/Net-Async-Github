@@ -619,6 +619,28 @@ sub repos {
     }
 }
 
+sub org_repos {
+    my ($self, %args) = @_;
+    if(my $user = delete $args{owner}) {
+        $self->validate_owner_name($user);
+        $self->api_get_list(
+            endpoint => 'organization_repositories',
+            endpoint_args => {
+                org => $user,
+            },
+            class => 'Net::Async::Github::Repository',
+        )
+    } else {
+        $self->api_get_list(
+            endpoint => 'current_user_repositories',
+            endpoint_args => {
+                visibility => $args{visibility} // 'all',
+            },
+            class => 'Net::Async::Github::Repository',
+        )
+    }
+}
+
 sub repo {
     my ($self, %args) = @_;
     die 'need an owner name' unless my $owner = delete $args{owner};
