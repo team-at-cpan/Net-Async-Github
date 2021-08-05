@@ -260,6 +260,16 @@ sub teams {
     )
 }
 
+sub Net::Async::Github::Repository::forks {
+    my ($self, %args) = @_;
+    my $gh = $self->github;
+    $gh->validate_args(%args);
+    $gh->api_get_list(
+        uri   => $self->forks_url->process,
+        class => 'Net::Async::Github::Repository',
+    )
+}
+
 sub Net::Async::Github::Repository::branches {
     my ($self, %args) = @_;
     my $gh = $self->github;
