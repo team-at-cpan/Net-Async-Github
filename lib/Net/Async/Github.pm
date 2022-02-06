@@ -705,6 +705,15 @@ sub users {
     )
 }
 
+sub users_for_org {
+    my ($self, %args) = @_;
+    $self->validate_args(%args);
+    $self->api_get_list(
+        uri   => '/orgs/' . $args{owner} . '/members',
+        class => 'Net::Async::Github::User',
+    )
+}
+
 =head2 head
 
 Identifies the head version for this branch.
