@@ -132,13 +132,13 @@
 		]
 	}, {
 		"package": "Branch",
-		"method_list": [
+   		"method_list": [
 			{ "name" : "name" }
 		]
 	}, {
 		"package": "PullRequest",
 		"method_list": [
-			{ "name" : "url" },
+			{ "name" : "url", "as" : "URI" },
 			{ "name" : "id" },
 			{ "name" : "node_id" },
 			{ "name" : "number" },
@@ -161,7 +161,18 @@
 			{ "name" : "base" },
 			{ "name" : "author_association" }
 		]
-	} ]
+	},{
+		"package" : "Commit",
+		"method_list": [
+			{ "name" : "url" },
+			{ "name" : "sha" },
+			{ "name" : "node_id"},
+			{ "name" : "html_url", "as":"URI::Template" },
+			{ "name" : "comments_url", "as":"URI::Template"},
+			{ "name" : "commit" },
+			{ "name" : "parents"}
+		]
+	}]
 }
 
 

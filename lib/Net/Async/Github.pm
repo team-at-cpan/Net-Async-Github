@@ -66,6 +66,7 @@ use Net::Async::Github::Plan;
 use Net::Async::Github::PullRequest;
 use Net::Async::Github::Repository;
 use Net::Async::Github::RateLimit;
+use Net::Async::Github::Commit;
 
 my $json = JSON::MaybeXS->new;
 
@@ -196,6 +197,7 @@ sub pull_request {
     die "needs $_" for grep !$args{$_}, qw(owner repo id);
     $self->validate_args(%args);
     my $uri = $self->base_uri;
+    # TODO use endpoint
     $uri->path(
         join '/', 'repos', $args{owner}, $args{repo}, 'pulls', $args{id}
     );
@@ -204,7 +206,7 @@ sub pull_request {
         uri => $uri,
     )->transform(
         done => sub {
-            $log->tracef('Github PR data was ', $_[0]);
+            $log->tracef('Github PR data was %s', $_[0]);
             Net::Async::Github::PullRequest->new(
                 %{$_[0]},
                 github => $self,
@@ -239,7 +241,7 @@ sub pull_requests {
     my ($self, %args) = @_;
     $self->validate_args(%args);
     $self->api_get_list(
-        endpoint => 'pull_request',
+        endpoint => 'pull_requests',
         endpoint_args => {
             owner => $args{owner},
             repo => $args{repo},
@@ -250,6 +252,65 @@ sub pull_requests {
 
 # Provide an alias for anyone relying on previous name
 *prs = *pull_requests;
+
+=head2 compare
+
+Compare the given base and head branch and return the latest 250 commits from the result.
+See L<https://docs.github.com/en/rest/reference/repos#compare-two-commits>
+
+Expects the following named parameters:
+
+=over 4
+
+=item * C<owner> - which user or organisation owns this branch
+
+=item * C<repo> - the repository this branch is in
+
+=item * C<base> - the base branch, which can be the format "user:branch" if it is in another repo in the same network
+
+=item * C<head> - the head branch, which can be the format "user:branch" if it is in another repo in the same network
+
+=back
+
+Returns a L<Future> instance resolved to a list of L<Net::Async::Github::PullRequest>
+
+=cut
+
+sub compare {
+    my ($self, %args) = @_;
+    $self->validate_args(%args);
+    ($args{$_} || die "$_ branch name required") for qw(base head);
+    for my $arg_name (qw(base head)){
+        if($args{$arg_name} =~ /^(.*):(.*)$/){
+            my ($user, $branch) = ($1, $2);
+            $self->validate_owner_name($user);
+            $self->validate_branch_name($branch);
+        }
+        else{
+            $self->validate_branch_name($args{$arg_name});
+        }
+    }
+    $self->http_get(
+        uri => $self->endpoint('compare',
+        owner => $args{owner},
+        repo => $args{repo},
+        base => $args{base},
+        head => $args{head})
+    )->transform(
+        done => sub {
+            my ($result) = @_;
+            $log->tracef('Github compare data was %s', $result);# TODO change tracef
+            my @commits;
+            foreach my $commit ($result->{commits}->@*){
+                push @commits, Net::Async::Github::Commit->new(
+                    $commit->%*,
+                    github => $self
+                );
+            }
+            return @commits;
+        }
+    );
+}
 
 sub teams {
     my ($self, %args) = @_;
@@ -399,7 +460,7 @@ sub create_pr {
     $self->validate_args(%args);
     $self->http_post(
         uri => $self->endpoint(
-            'pull_request',
+            'pull_requests',
             owner => $args{owner},
             repo  => $args{repo},
         ),
@@ -574,6 +635,37 @@ sub Net::Async::Github::PullRequest::merge {
             )
         }
     )
+}
+
+=head2 Net::Async::github::PullRequest::update
+
+update the state of a Pull Request. Please refer L<https://docs.github.com/en/rest/reference/pulls#update-a-pull-request>
+
+=cut
+
+
+
+sub Net::Async::Github::PullRequest::update {
+    my ($self, %args) = @_;
+    my $gh = $self->github;
+    $gh->validate_args(%args);
+    my $uri = $self->url;
+    $log->infof('URI for PR update is %s', "$uri");
+    $gh->http_patch(
+        uri => $uri,
+        data => \%args
+    )
+}
+
+=head2 Net::Async::Github::PullRequest::close
+
+Close a Pull Request.
+
+=cut
+
+sub Net::Async::Github::PullRequest::close {
+    my ($self, %args) = @_;
+    $self->update(state => 'close');
 }
 
 sub Net::Async::Github::PullRequest::cleanup {
@@ -1489,4 +1581,3 @@ Tom Molesworth <TEAM@cpan.org>, with contributions from C<< @chylli-binary >>.
 =head1 LICENSE
 
 Copyright Tom Molesworth 2014-2021. Licensed under the same terms as Perl itself.
-
