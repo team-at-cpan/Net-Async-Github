@@ -2,13 +2,11 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
     [New features]
-
     - added ->users_for_org method to list all users in the organisation
     - support for organisation repositories, as opposed to user repos
 
     [Bugs fixed]
-
-    -Fix missing Adapter::Async dependency
+    -Fix missing Adapter::Async and Variable::Disposition dependencies
 
 0.010     2021-03-24 10:32:12+08:00 Asia/Kuala_Lumpur
     No new features.
