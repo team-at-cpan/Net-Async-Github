@@ -15,6 +15,7 @@ requires 'Time::Moment', '>= 0.44';
 requires 'Cache::LRU', '>= 0.04';
 requires 'IO::Async::Notifier', '>= 0.78';
 requires 'Adapter::Async';
+requires 'Variable::Disposition';
 
 requires 'Net::Async::HTTP', '>= 0.48';
 requires 'Net::Async::WebSocket', 0;
