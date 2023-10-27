@@ -1,0 +1,299 @@
+NAME
+
+    Net::Async::Github - support for the https://github.com REST API with
+    IO::Async
+
+SYNOPSIS
+
+     use IO::Async::Loop;
+     use Net::Async::Github;
+     my $loop = IO::Async::Loop->new;
+     $loop->add(
+      my $gh = Net::Async::Github->new(
+       token => '...',
+      )
+     );
+     # Give 'secret_team' pull access to all private repos
+     $gh->repos(visibility => 'private')
+        ->grant_team(secret_team => 'pull')
+        ->await;
+
+DESCRIPTION
+
+    This is a basic wrapper for Github's API.
+
+METHODS
+
+ current_user
+
+    Returns information about the current user.
+
+     my $user = $gh->current_user->get;
+     printf "User [%s] has %d public repos and was last updated on %s%s\n",
+      $user->login, $user->public_repos, $user->updated_at->to_string
+
+    Resolves to a Net::Async::Github::User instance.
+
+ configure
+
+    Accepts the following optional named parameters:
+
+      * token - the Github API token
+
+      * endpoints - hashref of RFC6570
+      <https://tools.ietf.org/html/rfc6570>-compliant URL mappings
+
+      * http - an HTTP client compatible with the Net::Async::HTTP API
+
+      * mime_type - the MIME type to use as the Accept header for requests
+
+      * page_cache_size - number of GET responses to cache. Defaults to
+      1000, set to 0 to disable.
+
+      * timeout - How long in seconds to wait before giving up on a
+      request. Defaults to 60. If set to 0, then no timeout will take
+      place.
+
+     You probably just want token , defaults should be fine for the other
+    settings.
+
+    If you're creating a large number of instances, you can avoid some disk
+    access overhead by passing endpoints from an existing instance to the
+    constructor for a new instance.
+
+ reopen
+
+    Reopens the given PR.
+
+    Expects the following named parameters:
+
+      * owner - which user or organisation owns this PR
+
+      * repo - which repo it's for
+
+      * id - the pull request ID
+
+    Resolves to the current status.
+
+ pull_request
+
+    Returns information about the given PR.
+
+    Expects the following named parameters:
+
+      * owner - which user or organisation owns this PR
+
+      * repo - which repo it's for
+
+      * id - the pull request ID
+
+    Resolves to the current status.
+
+ pull_requests
+
+    Returns information of all PRs of given repository.
+
+    Expects the following named parameters:
+
+      * owner - which user or organisation owns this PR
+
+      * repo - the repository this pull request is for
+
+    Returns a Ryu::Source instance, this will emit a
+    Net::Async::Github::PullRequest instance for each found repository.
+
+ create_branch
+
+    Creates a new branch.
+
+    Takes the following named parameters:
+
+      * owner - which organisation owns the target repository
+
+      * repo - the repository to raise the PR against
+
+      * branch - new branch name that will be created
+
+      * sha - the SHA1 value for this branch
+
+ update_ref
+
+    Update a reference to a new commit
+
+    Takes the following named parameters:
+
+      * owner - which organisation owns the target repository
+
+      * repo - the repository to raise the PR against
+
+      * ref - ref name that we are updating.
+
+      * sha - the SHA1 value of comment that the ref will point to
+
+      * force - force update ref even if it is not fast-forward if it is
+      true.
+
+ create_pr
+
+    Creates a new pull request.
+
+    Takes the following named parameters:
+
+      * owner - which organisation owns the target repository
+
+      * repo - the repository to raise the PR against
+
+      * head - head commit starting point, typically the latest commit on
+      your fork's branch
+
+      * base - base commit this PR applies changes to typically you'd want
+      the target repo master
+
+ create_commit
+
+    Creates an empty commit. Can be used to simulate git commit
+    --allow-empty or to create a merge commit from multiple heads.
+
+    Takes the following named parameters:
+
+      * owner - which organisation owns the target repository
+
+      * repo - the repository to raise the PR against
+
+      * message - The commit message
+
+      * tree - The SHA of tree object that commit will point to
+
+      * parents - Arrayref that include the parents of the commit
+
+ user
+
+    Returns information about the given user.
+
+ users
+
+    Iterates through all users. This is a good way to exhaust your
+    5000-query ratelimiting quota.
+
+ head
+
+    Identifies the head version for this branch.
+
+    Requires the following named parameters:
+
+      * owner - which organisation or person owns the repo
+
+      * repo - the repository name
+
+      * branch - which branch to check
+
+ update
+
+ core_rate_limit
+
+    Returns a Net::Async::Github::RateLimit::Core instance which can track
+    rate limits.
+
+ rate_limit
+
+METHODS - Internal
+
+    The following methods are used internally. They're not expected to be
+    useful for external callers.
+
+ api_key
+
+ token
+
+ endpoints
+
+    Returns an accessor for the endpoints data. This is a hashref
+    containing URI templates, used by "endpoint".
+
+ endpoint
+
+    Expands the selected URI via URI::Template. Each item is defined in our
+     endpoints.json  file.
+
+    Returns a URI instance.
+
+ http
+
+    Accessor for the HTTP client object. Will load and instantiate a
+    Net::Async::HTTP instance if necessary.
+
+    Actual HTTP implementation is not guaranteed, and the default is likely
+    to change in future.
+
+ timeout
+
+    The parameter that will be used when create Net::Async::HTTP object. If
+    it is undef, then a default value 60 seconds will be used. If it is 0,
+    then Net::Async::HTTP will never timeout.
+
+ auth_info
+
+    Returns authentication information used in the HTTP request.
+
+ mime_type
+
+    Returns the MIME type used for requests. Currently defined by github in
+    https://developer.github.com/v3/media/ as
+    application/vnd.github.v3+json.
+
+ base_uri
+
+    The URI for requests. Defaults to https://api.github.com.
+
+ http_get
+
+    Performs an HTTP GET request.
+
+ pending_requests
+
+    A list of all pending requests.
+
+ validate_branch_name
+
+    Applies validation rules from git-check-ref-format for a branch name.
+
+    Will raise an exception on invalid input.
+
+ validate_owner_name
+
+    Applies github rules for user/organisation name.
+
+    Will raise an exception on invalid input.
+
+ validate_repo_name
+
+    Applies github rules for repository name.
+
+    Will raise an exception on invalid input.
+
+ validate_args
+
+    Convenience method to apply validation on common parameters.
+
+ page_cache_size
+
+    Returns the total number of GET responses we'll cache. Default is
+    probably 1000.
+
+ page_cache
+
+    The page cache instance, likely to be provided by Cache::LRU.
+
+ ryu
+
+    Our Ryu::Async instance, used for instantiating Ryu::Source instances.
+
+AUTHOR
+
+    Tom Molesworth <TEAM@cpan.org>, with contributions from @chylli-binary.
+
+LICENSE
+
+    Copyright Tom Molesworth 2014-2021. Licensed under the same terms as
+    Perl itself.
+
