@@ -1423,7 +1423,7 @@ sub validate_repo_name {
     # https://github.com/Automattic/_s
     # Canonical repositories with '. character would include the `.wiki` "magic" repo for each
     # Github repo
-    die "repo name contains invalid characters" if $repo =~ /[^a-z0-9.-]/i;
+    die "repo name contains invalid characters" if $repo =~ /[^a-z0-9._-]/i;
     die "repo name too long" if length($repo) > 100;
     return 1;
 }
