@@ -248,6 +248,19 @@ sub pull_requests {
     );
 }
 
+sub issue_comments {
+    my ($self, %args) = @_;
+    $self->validate_args(%args);
+    $self->api_get_list(
+        endpoint => 'issue_comments',
+        endpoint_args => {
+            owner => $args{owner},
+            repo  => $args{repo},
+        },
+        class => 'Net::Async::Github::Comment'
+    );
+}
+
 # Provide an alias for anyone relying on previous name
 *prs = *pull_requests;
 
