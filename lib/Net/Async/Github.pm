@@ -66,6 +66,7 @@ use Net::Async::Github::Plan;
 use Net::Async::Github::PullRequest;
 use Net::Async::Github::Repository;
 use Net::Async::Github::RateLimit;
+use Net::Async::Github::Comment;
 
 my $json = JSON::MaybeXS->new;
 
