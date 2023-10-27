@@ -68,7 +68,7 @@ use Net::Async::Github::Repository;
 use Net::Async::Github::RateLimit;
 use Net::Async::Github::Comment;
 
-my $json = JSON::MaybeXS->new;
+use JSON::MaybeUTF8 qw(:v2);
 
 =head1 METHODS
 
@@ -863,7 +863,7 @@ sub endpoints {
                 'endpoints.json'
             )
         ) unless $path->exists;
-        $json->decode($path->slurp_utf8)
+        decode_json_text($path->slurp_utf8)
     };
 }
 
@@ -1056,7 +1056,7 @@ sub http_get {
         ) if 3 == ($resp->code / 100);
         try {
             return Future->done(
-                $json->decode(
+                decode_json_utf8(
                     $resp->decoded_content
                 ),
                 $resp
@@ -1116,7 +1116,7 @@ sub http_delete {
         ) if 3 == ($resp->code / 100);
         try {
             return Future->done(
-                $json->decode(
+                decode_json_utf8(
                     $resp->decoded_content
                 ),
                 $resp
@@ -1151,7 +1151,7 @@ sub http_put {
     my $uri = delete $args{uri};
     my $data = delete $args{data};
     $log->tracef("%s %s { %s } <= %s", $method, $uri->as_string, \%args, $data);
-    $data = $json->encode($data) if ref $data;
+    $data = encode_json_utf8($data) if ref $data;
     $self->http->do_request(
         method       => $method,
         uri          => $uri,
@@ -1179,7 +1179,7 @@ sub http_put {
         ) if 3 == ($resp->code / 100);
         try {
             return Future->done(
-                $json->decode(
+                decode_json_utf8(
                     $resp->decoded_content
                 ),
                 $resp
@@ -1218,7 +1218,7 @@ sub http_post {
     my $uri = delete $args{uri};
     my $data = delete $args{data};
     $log->tracef("POST %s { %s } <= %s", $uri->as_string, \%args, $data);
-    $data = $json->encode($data) if ref $data;
+    $data = encode_json_utf8($data) if ref $data;
     $self->http->POST(
         $uri,
         $data,
@@ -1245,7 +1245,7 @@ sub http_post {
         ) if 3 == ($resp->code / 100);
         try {
             return Future->done(
-                $json->decode(
+                decode_json_utf8(
                     $resp->decoded_content
                 ),
                 $resp
