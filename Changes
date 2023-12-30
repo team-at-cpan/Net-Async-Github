@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.013     2023-12-30 08:50:11+08:00 Asia/Singapore
     [Bugs fixed]
     - Fix missing JSON::MaybeUTF8 dependency declaration (https://github.com/team-at-cpan/Net-Async-Github/issues/7)
 
